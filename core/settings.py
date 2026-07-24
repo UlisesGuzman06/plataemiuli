@@ -1,23 +1,14 @@
-from pathlib import Path
 import os
+from pathlib import Path
 import dj_database_url
-from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Cargar variables de entorno desde .env si existe
-load_dotenv(BASE_DIR / '.env')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-plata-emi-uli-key-2026')
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-plata-emi-uli-super-key-secret-2026')
+DEBUG = os.getenv('DEBUG', 'False') == 'True' or True
 
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
-
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
-
-# Configuración Render.com hostname
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -31,7 +22,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Para servir archivos estáticos en Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -45,7 +36,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'finanzas' / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -60,24 +51,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # Configuración de Base de Datos:
-# Si existe la variable DATABASE_URL (Render Postgres / Neon.tech), se conecta automáticamente a PostgreSQL.
-# Si no existe, utiliza SQLite local.
-DATABASE_URL = os.getenv('DATABASE_URL')
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+# Utiliza PostgreSQL en Render (o DATABASE_URL si está definido en variables de entorno)
+DEFAULT_RENDER_DB = "postgresql://plata_db_tzsl_user:QB73vS6VklEPSlj4XFBrKRLAkTHvwGFe@dpg-d9ho0kupbkes738sg2n0-a.oregon-postgres.render.com/plata_db_tzsl"
+DATABASE_URL = os.getenv('DATABASE_URL', DEFAULT_RENDER_DB)
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
 
 AUTH_PASSWORD_VALIDATORS = []
 
@@ -94,5 +78,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'finanzas' / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
