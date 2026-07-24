@@ -46,6 +46,11 @@ class Gasto(models.Model):
     
     monto_emi = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     monto_uli = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    # Fallback legacy fields for schema compatibility
+    monto_pagado_emi = models.DecimalField(max_digits=12, decimal_places=2, default=0, null=True, blank=True)
+    monto_pagado_uli = models.DecimalField(max_digits=12, decimal_places=2, default=0, null=True, blank=True)
+
     porcentaje_emi = models.DecimalField(max_digits=5, decimal_places=2, default=50.00)
 
     # Pago con tarjeta o efectivo/transferencia
