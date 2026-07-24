@@ -1,13 +1,17 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-plata-emi-uli-super-key-secret-2026'
+# Cargar variables de entorno desde .env si existe
+load_dotenv(BASE_DIR / '.env')
 
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-plata-emi-uli-super-key-secret-2026')
 
-ALLOWED_HOSTS = ['*']
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
