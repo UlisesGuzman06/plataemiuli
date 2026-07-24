@@ -4,33 +4,42 @@
 {% block title %}Dashboard General{% endblock %}
 
 {% block content %}
-<!-- Quick Metrics Grid -->
+<!-- Quick Combined Summary Cards -->
 <div class="grid-cards" style="margin-top:1rem;">
-  <div class="card">
+  <!-- Total Combinado Card -->
+  <div class="card" style="border-color:var(--border-pink); background:linear-gradient(135deg, rgba(34,36,43,0.95) 0%, rgba(236,72,153,0.08) 100%);">
     <div class="card-title">
-      <span>Gastos Totales ({{ mes_actual_nombre }})</span>
-      <span>💸</span>
+      <span>🔥 Total del Mes (Fijos + Gastos)</span>
+      <span>💰</span>
     </div>
-    <div class="card-amount">${{ summary.total_gastos|punto_monto }}</div>
-    <div class="card-subtext">Acumulado en ARS</div>
+    <div class="card-amount">${{ summary.gran_total|punto_monto }}</div>
+    <div class="card-subtext" style="color:var(--gray-300); font-weight:500;">
+      Gastos: <strong>${{ summary.total_gastos|punto_monto }}</strong> | Fijos: <strong>${{ summary.total_fijos|punto_monto }}</strong>
+    </div>
   </div>
 
+  <!-- Total Emi Card -->
   <div class="card">
     <div class="card-title">
-      <span>Gastos de Emi</span>
+      <span>Total de Emi ({{ mes_actual_nombre }})</span>
       <span class="badge" style="background:rgba(236, 72, 153, 0.25); color:#f472b6; border:1px solid rgba(236, 72, 153, 0.5);">EMI</span>
     </div>
-    <div class="card-amount pink">${{ summary.total_emi|punto_monto }}</div>
-    <div class="card-subtext">Total asignado a Emi</div>
+    <div class="card-amount pink">${{ summary.gran_total_emi|punto_monto }}</div>
+    <div class="card-subtext">
+      Gastos: <strong>${{ summary.total_emi|punto_monto }}</strong> | Fijos: <strong>${{ summary.total_fijos_emi|punto_monto }}</strong>
+    </div>
   </div>
 
+  <!-- Total Uli Card -->
   <div class="card">
     <div class="card-title">
-      <span>Gastos de Uli</span>
+      <span>Total de Uli ({{ mes_actual_nombre }})</span>
       <span class="badge" style="background:rgba(99, 102, 241, 0.25); color:#818cf8; border:1px solid rgba(99, 102, 241, 0.5);">ULI</span>
     </div>
-    <div class="card-amount" style="color:#818cf8;">${{ summary.total_uli|punto_monto }}</div>
-    <div class="card-subtext">Total asignado a Uli</div>
+    <div class="card-amount" style="color:#818cf8;">${{ summary.gran_total_uli|punto_monto }}</div>
+    <div class="card-subtext">
+      Gastos: <strong>${{ summary.total_uli|punto_monto }}</strong> | Fijos: <strong>${{ summary.total_fijos_uli|punto_monto }}</strong>
+    </div>
   </div>
 </div>
 
@@ -122,7 +131,10 @@
   <div>
     <div class="table-container">
       <div class="table-header-box">
-        <div class="table-title">📅 Próximos Vencimientos</div>
+        <div>
+          <div class="table-title">📅 Gastos Fijos ({{ mes_actual_nombre }})</div>
+          <div style="font-size:0.8rem; color:var(--pink-light); font-weight:600;">Total Fijos: ${{ summary.total_fijos|punto_monto }}</div>
+        </div>
       </div>
       <div style="padding:1rem;">
         {% for gf in gastos_fijos_proximos %}
