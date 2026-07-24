@@ -8,7 +8,7 @@
   <div class="hero-balance-header">
     <div>
       <div style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:var(--pink-light); font-weight:700;">
-        ⚖️ Estado de Cuentas Compartidas
+        ⚖️ Estado de Cuentas ({{ mes_actual_nombre }} {{ anio_actual }})
       </div>
       <div style="font-size:2.2rem; font-weight:800; color:white; margin-top:0.25rem;">
         {{ summary.deuda_texto.ars }}
@@ -32,7 +32,7 @@
 <div class="grid-cards">
   <div class="card">
     <div class="card-title">
-      <span>Total Gastos Compartidos</span>
+      <span>Gastos Compartidos ({{ mes_actual_nombre }})</span>
       <span>💸</span>
     </div>
     <div class="card-amount">${{ summary.ars.total_gastos|floatformat:2 }}</div>
@@ -41,7 +41,7 @@
 
   <div class="card">
     <div class="card-title">
-      <span>Aportes de Emi</span>
+      <span>Gastos de Emi</span>
       <span class="badge badge-emi">EMI</span>
     </div>
     <div class="card-amount pink">${{ summary.ars.emi_paid|floatformat:2 }}</div>
@@ -50,7 +50,7 @@
 
   <div class="card">
     <div class="card-title">
-      <span>Aportes de Uli</span>
+      <span>Gastos de Uli</span>
       <span class="badge badge-uli">ULI</span>
     </div>
     <div class="card-amount" style="color:#818cf8;">${{ summary.ars.uli_paid|floatformat:2 }}</div>
@@ -62,7 +62,7 @@
   <!-- Recent Activity Table -->
   <div class="table-container">
     <div class="table-header-box">
-      <div class="table-title">📝 Últimos Gastos Registrados</div>
+      <div class="table-title">📝 Gastos de {{ mes_actual_nombre }}</div>
       <a href="{% url 'gastos_list' %}" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.8rem;">Ver todos ➔</a>
     </div>
 
@@ -104,7 +104,7 @@
         {% empty %}
         <tr>
           <td colspan="6" style="text-align:center; padding:2rem; color:var(--gray-400);">
-            No hay gastos cargados aún. ¡Toca <strong>"Cargar Gasto"</strong> para empezar!
+            No hay gastos cargados en {{ mes_actual_nombre }}. ¡Toca <strong>"Cargar Gasto"</strong> para empezar!
           </td>
         </tr>
         {% endfor %}

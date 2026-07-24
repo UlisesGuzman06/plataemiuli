@@ -6,6 +6,11 @@ from django.utils import timezone
 from .models import Persona, Categoria, Gasto, GastoFijo, Ingreso, PagoSaldo, TipoDivision, Moneda
 from .services import get_dolar_rates, calculate_financial_summary
 
+MESES_NOMBRES = {
+    1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
+    7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+}
+
 def get_base_context(request):
     """Common context variables for topbar dollar rates and personas."""
     dolar_rates = get_dolar_rates()
@@ -21,25 +26,20 @@ def get_base_context(request):
 
 def dashboard_view(request):
     context = get_base_context(request)
-    summary = calculate_financial_summary()
-    recent_gastos = Gasto.objects.select_related('categoria', 'pagado_por')[:10]
+    now = timezone.now().date()
+    year = now.year
+    month = now.month
+    
+    summary = calculate_financial_summary(year=year, month=month)
+    recent_gastos = Gasto.objects.filter(fecha__year=year, fecha__month=month).select_related('categoria', 'pagado_por')[:15]
     gastos_fijos_proximos = GastoFijo.objects.filter(activo=True).order_by('dia_vencimiento')[:5]
     
-    # Calculate monthly category distribution for ARS
-    gastos_ars = Gasto.objects.filter(moneda='ARS')
-    cat_distribution = {}
-    for g in gastos_ars:
-        cat_name = g.categoria.nombre if g.categoria else 'Sin Categoría'
-        cat_icon = g.categoria.icono if g.categoria else '📦'
-        if cat_name not in cat_distribution:
-            cat_distribution[cat_name] = {'nombre': cat_name, 'icono': cat_icon, 'monto': Decimal('0.00')}
-        cat_distribution[cat_name]['monto'] += g.monto_total
-
     context.update({
         'summary': summary,
         'recent_gastos': recent_gastos,
         'gastos_fijos_proximos': gastos_fijos_proximos,
-        'cat_distribution': list(cat_distribution.values()),
+        'mes_actual_nombre': MESES_NOMBRES.get(month, ''),
+        'anio_actual': year,
         'active_tab': 'dashboard',
     })
     return render(request, 'finanzas/dashboard.html', context)
@@ -187,7 +187,8 @@ def balance_view(request):
         return redirect('balance')
 
     context = get_base_context(request)
-    summary = calculate_financial_summary()
+    now = timezone.now().date()
+    summary = calculate_financial_summary(year=now.year, month=now.month)
     historial_pagos = PagoSaldo.objects.select_related('pagador', 'receptor').all()
 
     context.update({
