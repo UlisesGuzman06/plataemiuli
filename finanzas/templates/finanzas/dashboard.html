@@ -4,8 +4,8 @@
 {% block title %}Dashboard General{% endblock %}
 
 {% block content %}
-<!-- Quick Summary Cards Grid (5 Cards) -->
-<div class="grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top:1rem;">
+<!-- Quick Summary Cards Grid -->
+<div class="grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-top:1rem;">
   <!-- Card 1: Gastos Variables -->
   <div class="card">
     <div class="card-title">
@@ -16,17 +16,7 @@
     <div class="card-subtext">Acumulado en {{ mes_actual_nombre }}</div>
   </div>
 
-  <!-- Card 2: Gastos Fijos -->
-  <div class="card">
-    <div class="card-title">
-      <span>Gastos Fijos</span>
-      <span>📅</span>
-    </div>
-    <div class="card-amount pink">${{ summary.total_fijos|punto_monto }}</div>
-    <div class="card-subtext">Comprometido en {{ mes_actual_nombre }}</div>
-  </div>
-
-  <!-- Card 3: Gastos Compartidos / Conjunto -->
+  <!-- Card 2: Gastos Compartidos -->
   <div class="card" style="border-color:rgba(52,211,153,0.4);">
     <div class="card-title">
       <span>Gastos Compartidos</span>
@@ -36,7 +26,31 @@
     <div class="card-subtext">Totales compartidos 50/50</div>
   </div>
 
-  <!-- Card 4: Total Emi -->
+  <!-- Card 3: Gastos Fijos Uli (Si existen) -->
+  {% if summary.total_fijos_uli > 0 %}
+  <div class="card">
+    <div class="card-title">
+      <span>Gastos Fijos Uli</span>
+      <span class="badge" style="background:rgba(99, 102, 241, 0.25); color:#818cf8; border:1px solid rgba(99, 102, 241, 0.5);">ULI</span>
+    </div>
+    <div class="card-amount" style="color:#818cf8;">${{ summary.total_fijos_uli|punto_monto }}</div>
+    <div class="card-subtext">Fijos asignados a Uli</div>
+  </div>
+  {% endif %}
+
+  <!-- Card 4: Gastos Fijos Emi (SOLO si existen) -->
+  {% if summary.total_fijos_emi > 0 %}
+  <div class="card">
+    <div class="card-title">
+      <span>Gastos Fijos Emi</span>
+      <span class="badge" style="background:rgba(236, 72, 153, 0.25); color:#f472b6; border:1px solid rgba(236, 72, 153, 0.5);">EMI</span>
+    </div>
+    <div class="card-amount pink">${{ summary.total_fijos_emi|punto_monto }}</div>
+    <div class="card-subtext">Fijos asignados a Emi</div>
+  </div>
+  {% endif %}
+
+  <!-- Card 5: Total Emi -->
   <div class="card">
     <div class="card-title">
       <span>Total de Emi</span>
@@ -46,7 +60,7 @@
     <div class="card-subtext">Var: ${{ summary.total_emi_var|punto_monto }} | Fijos: ${{ summary.total_fijos_emi|punto_monto }}</div>
   </div>
 
-  <!-- Card 5: Total Uli -->
+  <!-- Card 6: Total Uli -->
   <div class="card">
     <div class="card-title">
       <span>Total de Uli</span>
@@ -150,7 +164,13 @@
     <div class="table-container">
       <div class="table-header-box">
         <div>
-          <div class="table-title">📅 Gastos Fijos ({{ mes_actual_nombre }})</div>
+          <div class="table-title">
+            {% if summary.total_fijos_emi == 0 and summary.total_fijos_uli > 0 %}
+              📅 Gastos Fijos Uli
+            {% else %}
+              📅 Gastos Fijos Próximos
+            {% endif %}
+          </div>
           <div style="font-size:0.8rem; color:var(--pink-light); font-weight:600;">Total Fijos: ${{ summary.total_fijos|punto_monto }}</div>
         </div>
       </div>

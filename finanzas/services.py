@@ -55,6 +55,7 @@ def calculate_financial_summary(year=None, month=None):
         
         'total_fijos_emi': Decimal('0.00'),       # Fijos Emi
         'total_fijos_uli': Decimal('0.00'),       # Fijos Uli
+        'total_fijos_compartidos': Decimal('0.00'), # Fijos Compartidos
 
         'gran_total': Decimal('0.00'),            # Variables + Fijos total
         'gran_total_emi': Decimal('0.00'),        # Variables Emi + Fijos Emi
@@ -85,6 +86,7 @@ def calculate_financial_summary(year=None, month=None):
         elif gf.responsable == ResponsableFijo.ULI:
             summary['total_fijos_uli'] += monto
         else: # COMPARTIDO
+            summary['total_fijos_compartidos'] += monto
             half = monto / 2
             summary['total_fijos_emi'] += half
             summary['total_fijos_uli'] += half
