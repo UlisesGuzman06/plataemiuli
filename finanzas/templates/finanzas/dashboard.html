@@ -18,7 +18,7 @@
   <div class="card">
     <div class="card-title">
       <span>Gastos de Emi</span>
-      <span class="badge badge-emi">EMI</span>
+      <span class="badge" style="background:rgba(236, 72, 153, 0.25); color:#f472b6; border:1px solid rgba(236, 72, 153, 0.5);">EMI</span>
     </div>
     <div class="card-amount pink">${{ summary.total_emi|punto_monto }}</div>
     <div class="card-subtext">Total asignado a Emi</div>
@@ -27,7 +27,7 @@
   <div class="card">
     <div class="card-title">
       <span>Gastos de Uli</span>
-      <span class="badge badge-uli">ULI</span>
+      <span class="badge" style="background:rgba(99, 102, 241, 0.25); color:#818cf8; border:1px solid rgba(99, 102, 241, 0.5);">ULI</span>
     </div>
     <div class="card-amount" style="color:#818cf8;">${{ summary.total_uli|punto_monto }}</div>
     <div class="card-subtext">Total asignado a Uli</div>
@@ -76,7 +76,7 @@
           </td>
           <td style="font-weight:700; color:white;">${{ g.monto_total|punto_monto }}</td>
           <td>
-            <span class="badge badge-division-{{ g.tipo_division|lower }}">{{ g.get_tipo_division_display }}</span>
+            <span class="badge" style="{{ g.badge_style }}">{{ g.get_tipo_division_display }}</span>
           </td>
           <td style="color:#f472b6; font-weight:600;">${{ g.monto_emi|punto_monto }}</td>
           <td style="color:#818cf8; font-weight:600;">${{ g.monto_uli|punto_monto }}</td>
@@ -142,7 +142,7 @@
           <div style="text-align:right;">
             <div style="font-weight:700; color:var(--pink-light);">${{ gf.monto_estimado|punto_monto }}</div>
             <div style="font-size:0.75rem; color:var(--gray-400);">
-              <span class="badge badge-division-{{ gf.responsable|lower }}">{{ gf.get_responsable_display }}</span>
+              <span class="badge" style="{{ gf.badge_style }}">{{ gf.get_responsable_display }}</span>
             </div>
           </div>
         </div>

@@ -36,6 +36,16 @@ class Gasto(models.Model):
     notas = models.TextField(blank=True, default='')
     creado_en = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def badge_style(self):
+        if self.tipo_division == 'EMI':
+            return 'background:rgba(236, 72, 153, 0.25); color:#f472b6; border:1px solid rgba(236, 72, 153, 0.5);'
+        elif self.tipo_division == 'ULI':
+            return 'background:rgba(99, 102, 241, 0.25); color:#818cf8; border:1px solid rgba(99, 102, 241, 0.5);'
+        elif self.tipo_division == '50_50':
+            return 'background:rgba(52, 211, 153, 0.25); color:#34d399; border:1px solid rgba(52, 211, 153, 0.5);'
+        return 'background:rgba(251, 191, 36, 0.25); color:#fbbf24; border:1px solid rgba(251, 191, 36, 0.5);'
+
     def save(self, *args, **kwargs):
         if not self.pagado_por:
             self.pagado_por = Persona.objects.first()
@@ -86,6 +96,14 @@ class GastoFijo(models.Model):
 
     activo = models.BooleanField(default=True)
     notas = models.TextField(blank=True, default='')
+
+    @property
+    def badge_style(self):
+        if self.responsable == 'EMI':
+            return 'background:rgba(236, 72, 153, 0.25); color:#f472b6; border:1px solid rgba(236, 72, 153, 0.5);'
+        elif self.responsable == 'ULI':
+            return 'background:rgba(99, 102, 241, 0.25); color:#818cf8; border:1px solid rgba(99, 102, 241, 0.5);'
+        return 'background:rgba(52, 211, 153, 0.25); color:#34d399; border:1px solid rgba(52, 211, 153, 0.5);'
 
     def cuota_actual(self):
         if self.es_cuota and self.cuotas_totales and self.cuotas_restantes is not None:
