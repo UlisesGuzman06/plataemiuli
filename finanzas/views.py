@@ -73,6 +73,26 @@ def dashboard_view(request):
     return render(request, 'finanzas/dashboard.html', context)
 
 
+def editar_gasto_view(request, gasto_id):
+    gasto = get_object_or_404(Gasto, id=gasto_id)
+    if request.method == 'POST':
+        gasto.descripcion = request.POST.get('descripcion')
+        gasto.monto_total = Decimal(request.POST.get('monto_total', '0'))
+        gasto.fecha = request.POST.get('fecha') or gasto.fecha
+        gasto.tipo_division = request.POST.get('tipo_division', gasto.tipo_division)
+        gasto.notas = request.POST.get('notas', '')
+
+        if gasto.tipo_division == TipoDivision.EXACT_AMOUNT:
+            gasto.monto_emi = Decimal(request.POST.get('monto_emi', '0') or '0')
+            gasto.monto_uli = Decimal(request.POST.get('monto_uli', '0') or '0')
+
+        gasto.save()
+        messages.success(request, f'Gasto "{gasto.descripcion}" actualizado correctamente.')
+        return redirect('dashboard')
+
+    return redirect('dashboard')
+
+
 def eliminar_gasto_view(request, gasto_id):
     if request.method == 'POST':
         gasto = get_object_or_404(Gasto, id=gasto_id)
@@ -118,6 +138,29 @@ def gastos_fijos_view(request):
         'active_tab': 'gastos_fijos',
     })
     return render(request, 'finanzas/gastos_fijos.html', context)
+
+
+def editar_gasto_fijo_view(request, gf_id):
+    gf = get_object_or_404(GastoFijo, id=gf_id)
+    if request.method == 'POST':
+        gf.nombre = request.POST.get('nombre')
+        gf.monto_estimado = Decimal(request.POST.get('monto_estimado', '0'))
+        gf.dia_vencimiento = int(request.POST.get('dia_vencimiento', '1'))
+        gf.responsable = request.POST.get('responsable', gf.responsable)
+        
+        gf.es_cuota = request.POST.get('es_cuota') == 'on'
+        c_tot = request.POST.get('cuotas_totales')
+        c_rest = request.POST.get('cuotas_restantes')
+        gf.fecha_fin_cuota = request.POST.get('fecha_fin_cuota') or None
+
+        gf.cuotas_totales = int(c_tot) if (gf.es_cuota and c_tot) else None
+        gf.cuotas_restantes = int(c_rest) if (gf.es_cuota and c_rest) else None
+
+        gf.save()
+        messages.success(request, f'Gasto fijo "{gf.nombre}" actualizado correctamente.')
+        return redirect('gastos_fijos')
+
+    return redirect('gastos_fijos')
 
 
 def descontar_cuota_view(request, gf_id):

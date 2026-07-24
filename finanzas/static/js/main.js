@@ -1,11 +1,12 @@
 /* ==========================================================================
-   Plata Emi & Uli - Interactive JS & Dynamic Split Calculator
+   Plata Emi & Uli - Interactive JS, Edit Modals & Dynamic Split Calculator
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
     initModals();
     initSplitCalculator();
     initDetailModal();
+    initEditModals();
     initDolarConverter();
 });
 
@@ -104,6 +105,7 @@ function initDetailModal() {
     detailTriggers.forEach(el => {
         el.addEventListener('click', (e) => {
             e.preventDefault();
+            const id = el.getAttribute('data-id') || '';
             const desc = el.getAttribute('data-desc') || '';
             const monto = el.getAttribute('data-monto') || '0';
             const fecha = el.getAttribute('data-fecha') || '';
@@ -120,9 +122,99 @@ function initDetailModal() {
             document.getElementById('detail-uli').textContent = `$${uli}`;
             document.getElementById('detail-notas').textContent = notas ? notas : 'Sin descripción o notas adicionales.';
 
+            // Pass ID to detail modal edit button
+            const detailEditBtn = document.getElementById('detail-btn-edit');
+            if (detailEditBtn) {
+                detailEditBtn.setAttribute('data-id', id);
+                detailEditBtn.setAttribute('data-desc', desc);
+                detailEditBtn.setAttribute('data-monto-raw', el.getAttribute('data-monto-raw') || '');
+                detailEditBtn.setAttribute('data-fecha-raw', el.getAttribute('data-fecha-raw') || '');
+                detailEditBtn.setAttribute('data-division-raw', el.getAttribute('data-division-raw') || '');
+                detailEditBtn.setAttribute('data-notas', notas);
+            }
+
             modal.classList.add('active');
         });
     });
+}
+
+function initEditModals() {
+    // 1. Edit Gasto Modal
+    const editGastoTriggers = document.querySelectorAll('[data-edit-gasto]');
+    const modalEditGasto = document.getElementById('modal-editar-gasto');
+    const formEditGasto = document.getElementById('form-editar-gasto');
+
+    if (modalEditGasto && formEditGasto) {
+        editGastoTriggers.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const id = btn.getAttribute('data-id');
+                const desc = btn.getAttribute('data-desc') || '';
+                const monto = btn.getAttribute('data-monto-raw') || '0';
+                const fecha = btn.getAttribute('data-fecha-raw') || '';
+                const division = btn.getAttribute('data-division-raw') || '50_50';
+                const notas = btn.getAttribute('data-notas') || '';
+
+                formEditGasto.action = `/editar/${id}/`;
+                document.getElementById('edit-gasto-desc').value = desc;
+                document.getElementById('edit-gasto-monto').value = monto;
+                document.getElementById('edit-gasto-fecha').value = fecha;
+                document.getElementById('edit-gasto-division').value = division;
+                document.getElementById('edit-gasto-notas').value = notas;
+
+                // Close detail modal if open
+                const detailModal = document.getElementById('modal-detalle-gasto');
+                if (detailModal) detailModal.classList.remove('active');
+
+                modalEditGasto.classList.add('active');
+            });
+        });
+    }
+
+    // 2. Edit Gasto Fijo Modal
+    const editGfTriggers = document.querySelectorAll('[data-edit-gf]');
+    const modalEditGf = document.getElementById('modal-editar-gasto-fijo');
+    const formEditGf = document.getElementById('form-editar-gasto-fijo');
+
+    if (modalEditGf && formEditGf) {
+        editGfTriggers.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const id = btn.getAttribute('data-id');
+                const nombre = btn.getAttribute('data-nombre') || '';
+                const monto = btn.getAttribute('data-monto-raw') || '0';
+                const dia = btn.getAttribute('data-dia') || '1';
+                const resp = btn.getAttribute('data-resp') || 'COMPARTIDO';
+                const esCuota = btn.getAttribute('data-es-cuota') === 'true';
+                const cTotales = btn.getAttribute('data-cuotas-totales') || '';
+                const cRestantes = btn.getAttribute('data-cuotas-restantes') || '';
+                const fechaFin = btn.getAttribute('data-fecha-fin') || '';
+
+                formEditGf.action = `/gastos-fijos/editar/${id}/`;
+                document.getElementById('edit-gf-nombre').value = nombre;
+                document.getElementById('edit-gf-monto').value = monto;
+                document.getElementById('edit-gf-dia').value = dia;
+                document.getElementById('edit-gf-responsable').value = resp;
+
+                const checkCuota = document.getElementById('edit-gf-check-cuota');
+                const boxCuotas = document.getElementById('edit-gf-box-cuotas');
+                if (checkCuota) {
+                    checkCuota.checked = esCuota;
+                    if (boxCuotas) boxCuotas.style.display = esCuota ? 'block' : 'none';
+                }
+
+                document.getElementById('edit-gf-cuotas-totales').value = cTotales;
+                document.getElementById('edit-gf-cuotas-restantes').value = cRestantes;
+                document.getElementById('edit-gf-fecha-fin').value = fechaFin;
+
+                modalEditGf.classList.add('active');
+            });
+        });
+    }
 }
 
 function initDolarConverter() {

@@ -40,7 +40,7 @@
     <div class="table-header-box">
       <div>
         <div class="table-title">📝 Gastos de {{ mes_actual_nombre }} ({{ gastos.paginator.count }} totales)</div>
-        <div style="font-size:0.8rem; color:var(--gray-400);">Toca cualquier fila para ver el detalle completo.</div>
+        <div style="font-size:0.8rem; color:var(--gray-400);">Toca cualquier fila para ver el detalle o editar.</div>
       </div>
       <button class="btn btn-pink" style="font-size:0.85rem; padding:0.4rem 0.8rem;" data-open-modal="modal-nuevo-gasto">➕ Cargar Gasto</button>
     </div>
@@ -54,16 +54,20 @@
           <th>División</th>
           <th>Cargo Emi</th>
           <th>Cargo Uli</th>
-          <th style="text-align:right;">Borrar</th>
+          <th style="text-align:right;">Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for g in gastos %}
         <tr class="table-row-clickable" style="cursor:pointer;" data-gasto-detail 
+            data-id="{{ g.id }}"
             data-desc="{{ g.descripcion }}" 
             data-monto="{{ g.monto_total|punto_monto }}" 
+            data-monto-raw="{{ g.monto_total }}"
             data-fecha="{{ g.fecha|date:'d/m/Y' }}" 
+            data-fecha-raw="{{ g.fecha|date:'Y-m-d' }}"
             data-division="{{ g.get_tipo_division_display }}" 
+            data-division-raw="{{ g.tipo_division }}"
             data-emi="{{ g.monto_emi|punto_monto }}" 
             data-uli="{{ g.monto_uli|punto_monto }}" 
             data-notas="{{ g.notas }}">
@@ -81,10 +85,22 @@
           <td style="color:#f472b6; font-weight:600;">${{ g.monto_emi|punto_monto }}</td>
           <td style="color:#818cf8; font-weight:600;">${{ g.monto_uli|punto_monto }}</td>
           <td style="text-align:right;" onclick="event.stopPropagation();">
-            <form action="{% url 'eliminar_gasto' g.id %}" method="POST" onsubmit="return confirm('¿Eliminar este gasto?')" style="margin:0; display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn-danger-icon" title="Eliminar">🗑️</button>
-            </form>
+            <div style="display:flex; gap:0.4rem; justify-content:flex-end; align-items:center;">
+              <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.8rem;" data-edit-gasto
+                      data-id="{{ g.id }}"
+                      data-desc="{{ g.descripcion }}"
+                      data-monto-raw="{{ g.monto_total }}"
+                      data-fecha-raw="{{ g.fecha|date:'Y-m-d' }}"
+                      data-division-raw="{{ g.tipo_division }}"
+                      data-notas="{{ g.notas }}"
+                      title="Editar gasto">
+                ✏️
+              </button>
+              <form action="{% url 'eliminar_gasto' g.id %}" method="POST" onsubmit="return confirm('¿Eliminar este gasto?')" style="margin:0; display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger-icon" title="Eliminar">🗑️</button>
+              </form>
+            </div>
           </td>
         </tr>
         {% empty %}
