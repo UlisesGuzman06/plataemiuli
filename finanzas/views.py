@@ -29,7 +29,7 @@ def dashboard_view(request):
     
     summary = calculate_financial_summary(year=year, month=month)
     recent_gastos = Gasto.objects.filter(fecha__year=year, fecha__month=month).select_related('categoria')[:10]
-    gastos_fijos_proximos = GastoFijo.objects.filter(activo=True).order_by('dia_vencimiento')[:5]
+    gastos_fijos_proximos = GastoFijo.objects.filter(activo=True).order_by('dia_vencimiento')[:10]
     
     context.update({
         'summary': summary,
@@ -78,12 +78,10 @@ def gastos_list_view(request):
     context = get_base_context(request)
     gastos_qs = Gasto.objects.select_related('categoria').all()
 
-    # Filter logic
     categoria_filter = request.GET.get('categoria')
     if categoria_filter:
         gastos_qs = gastos_qs.filter(categoria_id=categoria_filter)
 
-    # Paginación de 10 elementos por página
     paginator = Paginator(gastos_qs, 10)
     page_number = request.GET.get('page')
     gastos_page = paginator.get_page(page_number)
@@ -109,13 +107,14 @@ def gastos_fijos_view(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         monto_estimado = Decimal(request.POST.get('monto_estimado', '0'))
-        dia_vencimiento = int(request.POST.get('dia_vencimiento', '10'))
+        dia_vencimiento = int(request.POST.get('dia_vencimiento', '1'))
         categoria_id = request.POST.get('categoria')
         responsable = request.POST.get('responsable', 'COMPARTIDO')
         
         es_cuota = request.POST.get('es_cuota') == 'on'
         cuotas_totales = request.POST.get('cuotas_totales')
         cuotas_restantes = request.POST.get('cuotas_restantes')
+        fecha_fin_cuota = request.POST.get('fecha_fin_cuota') or None
 
         categoria = Categoria.objects.filter(id=categoria_id).first() if categoria_id else None
 
@@ -131,6 +130,7 @@ def gastos_fijos_view(request):
             es_cuota=es_cuota,
             cuotas_totales=c_tot,
             cuotas_restantes=c_rest,
+            fecha_fin_cuota=fecha_fin_cuota if es_cuota else None,
             activo=True
         )
         messages.success(request, f'Gasto fijo "{nombre}" registrado.')

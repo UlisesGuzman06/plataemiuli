@@ -85,7 +85,7 @@ class ResponsableFijo(models.TextChoices):
 class GastoFijo(models.Model):
     nombre = models.CharField(max_length=100)
     monto_estimado = models.DecimalField(max_digits=12, decimal_places=2)
-    dia_vencimiento = models.IntegerField(default=10)
+    dia_vencimiento = models.IntegerField(default=1)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
     responsable = models.CharField(max_length=15, choices=ResponsableFijo.choices, default=ResponsableFijo.COMPARTIDO)
     
@@ -93,6 +93,7 @@ class GastoFijo(models.Model):
     es_cuota = models.BooleanField(default=False)
     cuotas_totales = models.IntegerField(null=True, blank=True, default=None)
     cuotas_restantes = models.IntegerField(null=True, blank=True, default=None)
+    fecha_fin_cuota = models.DateField(null=True, blank=True, help_text="Fecha o mes de finalización de la cuota")
 
     activo = models.BooleanField(default=True)
     notas = models.TextField(blank=True, default='')

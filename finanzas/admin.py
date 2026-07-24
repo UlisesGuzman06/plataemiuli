@@ -20,6 +20,6 @@ class GastoAdmin(admin.ModelAdmin):
 
 @admin.register(GastoFijo)
 class GastoFijoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nombre', 'monto_estimado', 'dia_vencimiento', 'responsable', 'es_cuota', 'cuotas_totales', 'cuotas_restantes', 'activo')
+    list_display = ('id', 'nombre', 'monto_estimado', 'dia_vencimiento', 'responsable', 'es_cuota', 'cuotas_totales', 'cuotas_restantes', 'fecha_fin_cuota', 'activo')
     list_filter = ('responsable', 'es_cuota', 'activo')
     search_fields = ('nombre',)

@@ -23,7 +23,7 @@
         <th>Categoría</th>
         <th>Monto Estimado</th>
         <th>Responsable</th>
-        <th>Cuotas / Avance</th>
+        <th>Cuotas / Finalización</th>
         <th>Estado</th>
         <th>Acciones</th>
       </tr>
@@ -52,9 +52,14 @@
           <span class="badge badge-shared">{{ gf.get_responsable_display }}</span>
         </td>
         <td>
-          {% if gf.es_cuota and gf.cuotas_totales %}
-          <div style="display:flex; align-items:center; gap:0.5rem;">
-            <form action="{% url 'descontar_cuota' gf.id %}" method="POST" style="margin:0;">
+          {% if gf.es_cuota %}
+          <div>
+            {% if gf.fecha_fin_cuota %}
+            <div style="font-size:0.8rem; color:var(--pink-light); font-weight:600;">
+              🏁 Finaliza: {{ gf.fecha_fin_cuota|date:"d/m/Y" }}
+            </div>
+            {% endif %}
+            <form action="{% url 'descontar_cuota' gf.id %}" method="POST" style="margin-top:0.25rem;">
               {% csrf_token %}
               <button type="submit" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem;" title="Pagar y descontar 1 cuota">
                 -1 Cuota
@@ -114,8 +119,8 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Día de Vencimiento</label>
-          <input type="number" name="dia_vencimiento" min="1" max="31" class="form-control" value="10" required>
+          <label class="form-label">Día de Vencimiento (1 al 31)</label>
+          <input type="number" name="dia_vencimiento" min="1" max="31" class="form-control" value="1" required>
         </div>
       </div>
 
@@ -123,9 +128,9 @@
         <div class="form-group">
           <label class="form-label">Responsable</label>
           <select name="responsable" class="form-select">
-            <option value="COMPARTIDO">Compartido (50/50)</option>
             <option value="ULI">Uli</option>
             <option value="EMI">Emi</option>
+            <option value="COMPARTIDO">Compartido (50/50)</option>
           </select>
         </div>
 
@@ -144,19 +149,26 @@
       <div style="background:var(--bg-canvas); padding:1rem; border-radius:var(--radius-md); margin-top:0.5rem; margin-bottom:1rem; border:1px solid var(--border-color);">
         <div class="form-group" style="margin-bottom:0.5rem;">
           <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; color:var(--pink-light);">
-            <input type="checkbox" name="es_cuota" id="check-es-cuota" onchange="document.getElementById('box-cuotas-fields').style.display = this.checked ? 'grid' : 'none'">
+            <input type="checkbox" name="es_cuota" id="check-es-cuota" onchange="document.getElementById('box-cuotas-fields').style.display = this.checked ? 'block' : 'none'">
             ¿Es un gasto en cuotas limite? (Ej: Moto en 6 cuotas)
           </label>
         </div>
 
-        <div class="form-grid-2" id="box-cuotas-fields" style="display:none; margin-top:0.75rem;">
-          <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Cuotas Totales</label>
-            <input type="number" min="1" name="cuotas_totales" class="form-control" placeholder="Ej: 6">
+        <div id="box-cuotas-fields" style="display:none; margin-top:0.75rem;">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Cuotas Totales</label>
+              <input type="number" min="1" name="cuotas_totales" class="form-control" placeholder="Ej: 6">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cuotas Restantes</label>
+              <input type="number" min="1" name="cuotas_restantes" class="form-control" placeholder="Ej: 6">
+            </div>
           </div>
+
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Cuotas Restantes</label>
-            <input type="number" min="1" name="cuotas_restantes" class="form-control" placeholder="Ej: 6">
+            <label class="form-label">Fecha de Finalización de Cuota (Opcional)</label>
+            <input type="date" name="fecha_fin_cuota" class="form-control">
           </div>
         </div>
       </div>
