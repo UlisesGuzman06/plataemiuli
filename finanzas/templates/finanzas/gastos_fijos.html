@@ -20,7 +20,6 @@
       <tr>
         <th>Vencimiento</th>
         <th>Nombre</th>
-        <th>Categoría</th>
         <th>Monto Estimado</th>
         <th>Responsable</th>
         <th>Cuotas / Finalización</th>
@@ -40,16 +39,9 @@
           </div>
           {% endif %}
         </td>
-        <td>
-          {% if gf.categoria %}
-          <span>{{ gf.categoria.icono }} {{ gf.categoria.nombre }}</span>
-          {% else %}
-          <span style="color:var(--gray-500);">Sin cat.</span>
-          {% endif %}
-        </td>
         <td style="font-weight:700; color:white;">${{ gf.monto_estimado|punto_monto }}</td>
         <td>
-          <span class="badge badge-shared">{{ gf.get_responsable_display }}</span>
+          <span class="badge badge-division-{{ gf.responsable|lower }}">{{ gf.get_responsable_display }}</span>
         </td>
         <td>
           {% if gf.es_cuota %}
@@ -88,7 +80,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="8" style="text-align:center; padding:2rem; color:var(--gray-400);">
+        <td colspan="7" style="text-align:center; padding:2rem; color:var(--gray-400);">
           No hay gastos fijos registrados.
         </td>
       </tr>
@@ -124,25 +116,13 @@
         </div>
       </div>
 
-      <div class="form-grid-2">
-        <div class="form-group">
-          <label class="form-label">Responsable</label>
-          <select name="responsable" class="form-select">
-            <option value="ULI">Uli</option>
-            <option value="EMI">Emi</option>
-            <option value="COMPARTIDO">Compartido (50/50)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Categoría</label>
-          <select name="categoria" class="form-select">
-            <option value="">Sin Categoría</option>
-            {% for c in categorias %}
-            <option value="{{ c.id }}">{{ c.icono }} {{ c.nombre }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      <div class="form-group">
+        <label class="form-label">Responsable</label>
+        <select name="responsable" class="form-select">
+          <option value="ULI">Uli</option>
+          <option value="EMI">Emi</option>
+          <option value="COMPARTIDO">Ambos</option>
+        </select>
       </div>
 
       <!-- Configuración de Cuotas -->

@@ -279,47 +279,6 @@ body::before {
   margin-top: 0.35rem;
 }
 
-/* Balance Hero Highlight Box */
-.hero-balance-box {
-  background: linear-gradient(135deg, rgba(34, 36, 43, 0.95) 0%, rgba(42, 45, 54, 0.95) 100%);
-  border: 1.5px solid var(--border-pink);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  margin-bottom: 1.75rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-}
-
-.hero-balance-box::after {
-  content: '';
-  position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.hero-balance-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.hero-status-pill {
-  background: var(--pink-gradient);
-  color: white;
-  padding: 0.5rem 1.25rem;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
-  font-size: 1.1rem;
-  box-shadow: var(--pink-glow);
-}
-
 /* Tables */
 .table-container {
   background: var(--bg-card);
@@ -374,7 +333,7 @@ tr:last-child td {
   border-bottom: none;
 }
 
-tr:hover td {
+tr.table-row-clickable:hover td {
   background: var(--bg-card-hover);
 }
 
@@ -430,42 +389,44 @@ tr:hover td {
   background: rgba(239, 68, 68, 0.15);
 }
 
-/* Badges */
+/* Badges con Colores Distintivos */
 .badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.8rem;
   border-radius: var(--radius-pill);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.badge-emi {
-  background: rgba(236, 72, 153, 0.2);
+.badge-division-50_50, .badge-division-ambos, .badge-shared {
+  background: rgba(52, 211, 153, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.badge-division-emi, .badge-emi {
+  background: rgba(236, 72, 153, 0.18);
   color: #f472b6;
   border: 1px solid rgba(236, 72, 153, 0.4);
 }
 
-.badge-uli {
-  background: rgba(99, 102, 241, 0.2);
+.badge-division-uli, .badge-uli {
+  background: rgba(99, 102, 241, 0.18);
   color: #818cf8;
   border: 1px solid rgba(99, 102, 241, 0.4);
 }
 
-.badge-shared {
-  background: rgba(52, 211, 153, 0.2);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.4);
+.badge-division-exact {
+  background: rgba(251, 191, 36, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
 }
 
 .badge-ars {
   background: rgba(244, 244, 245, 0.1);
   color: #e4e4e7;
-}
-
-.badge-usd {
-  background: rgba(52, 211, 153, 0.15);
-  color: #34d399;
 }
 
 /* Forms & Inputs */

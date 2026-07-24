@@ -76,7 +76,7 @@
           </td>
           <td style="font-weight:700; color:white;">${{ g.monto_total|punto_monto }}</td>
           <td>
-            <span class="badge badge-shared">{{ g.get_tipo_division_display }}</span>
+            <span class="badge badge-division-{{ g.tipo_division|lower }}">{{ g.get_tipo_division_display }}</span>
           </td>
           <td style="color:#f472b6; font-weight:600;">${{ g.monto_emi|punto_monto }}</td>
           <td style="color:#818cf8; font-weight:600;">${{ g.monto_uli|punto_monto }}</td>
@@ -141,7 +141,9 @@
           </div>
           <div style="text-align:right;">
             <div style="font-weight:700; color:var(--pink-light);">${{ gf.monto_estimado|punto_monto }}</div>
-            <div style="font-size:0.75rem; color:var(--gray-400);">{{ gf.get_responsable_display }}</div>
+            <div style="font-size:0.75rem; color:var(--gray-400);">
+              <span class="badge badge-division-{{ gf.responsable|lower }}">{{ gf.get_responsable_display }}</span>
+            </div>
           </div>
         </div>
         {% empty %}
