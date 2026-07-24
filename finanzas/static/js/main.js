@@ -31,7 +31,7 @@ function initModals() {
         });
     });
 
-    // Se removió el cierre por clic afuera: los modales ahora solo se cierran tocando la cruz '✕' o 'Cancelar'.
+    // Se deshabilitó el cierre al hacer clic afuera: los modales solo se cierran al presionar '✕' o 'Cancelar'.
 }
 
 function initSplitCalculator() {
@@ -118,6 +118,12 @@ function initDetailModal() {
             document.getElementById('detail-emi').textContent = `$${emi}`;
             document.getElementById('detail-uli').textContent = `$${uli}`;
             document.getElementById('detail-notas').textContent = notas ? notas : 'Sin descripción o notas adicionales.';
+
+            // Delete form action inside detail modal
+            const deleteForm = document.getElementById('detail-action-delete');
+            if (deleteForm) {
+                deleteForm.action = `/eliminar/${id}/`;
+            }
 
             const detailEditBtn = document.getElementById('detail-btn-edit');
             if (detailEditBtn) {
@@ -244,7 +250,6 @@ function initEditModals() {
                 
                 const montoInput = document.getElementById('edit-gasto-monto');
                 if (montoInput) {
-                    // Convert potential comma string to standard float dot string for input[type=number]
                     montoInput.value = parseFloat(monto.replace(',', '.')) || '';
                 }
 

@@ -40,7 +40,7 @@
     <div class="table-header-box">
       <div>
         <div class="table-title">📝 Gastos de {{ mes_actual_nombre }} ({{ gastos.paginator.count }} totales)</div>
-        <div style="font-size:0.8rem; color:var(--gray-400);">Toca cualquier fila para ver el detalle o editar.</div>
+        <div style="font-size:0.8rem; color:var(--gray-400);">Toca cualquier fila para ver el detalle y sus acciones (editar o borrar).</div>
       </div>
       <button class="btn btn-pink" style="font-size:0.85rem; padding:0.4rem 0.8rem;" data-open-modal="modal-nuevo-gasto">➕ Cargar Gasto</button>
     </div>
@@ -54,7 +54,6 @@
           <th>División</th>
           <th>Cargo Emi</th>
           <th>Cargo Uli</th>
-          <th style="text-align:right;">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -84,28 +83,10 @@
           </td>
           <td style="color:#f472b6; font-weight:600;">${{ g.monto_emi|punto_monto }}</td>
           <td style="color:#818cf8; font-weight:600;">${{ g.monto_uli|punto_monto }}</td>
-          <td style="text-align:right;" onclick="event.stopPropagation();">
-            <div style="display:flex; gap:0.4rem; justify-content:flex-end; align-items:center;">
-              <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.8rem;" data-edit-gasto
-                      data-id="{{ g.id }}"
-                      data-desc="{{ g.descripcion }}"
-                      data-monto-raw="{{ g.monto_total|stringformat:'f' }}"
-                      data-fecha-raw="{{ g.fecha|date:'Y-m-d' }}"
-                      data-division-raw="{{ g.tipo_division }}"
-                      data-notas="{{ g.notas }}"
-                      title="Editar gasto">
-                ✏️
-              </button>
-              <form action="{% url 'eliminar_gasto' g.id %}" method="POST" onsubmit="return confirm('¿Eliminar este gasto?')" style="margin:0; display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn-danger-icon" title="Eliminar">🗑️</button>
-              </form>
-            </div>
-          </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7" style="text-align:center; padding:2rem; color:var(--gray-400);">
+          <td colspan="6" style="text-align:center; padding:2rem; color:var(--gray-400);">
             No hay gastos cargados en {{ mes_actual_nombre }}. ¡Toca <strong>"Cargar Gasto"</strong> para empezar!
           </td>
         </tr>

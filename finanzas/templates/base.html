@@ -244,15 +244,32 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" style="margin-bottom:1.25rem;">
         <label class="form-label">📌 Descripción Detallada / Notas:</label>
         <div id="detail-notas" style="background:var(--bg-canvas); border:1px solid var(--border-color); padding:1rem; border-radius:var(--radius-md); font-size:0.95rem; color:var(--gray-300); min-height:60px; white-space:pre-wrap;">
           -
         </div>
       </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem;">
-        <button type="button" id="detail-btn-edit" class="btn btn-secondary" data-edit-gasto style="font-size:0.85rem;">✏️ Editar Gasto</button>
+      <!-- Acciones Adentro del Modal -->
+      <div style="font-size:0.85rem; font-weight:700; color:var(--gray-400); margin-bottom:0.75rem;">
+        ⚡ ACCIONES DEL GASTO:
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.65rem;">
+        <button type="button" id="detail-btn-edit" class="btn btn-secondary" data-edit-gasto style="justify-content:center;">
+          ✏️ Editar Gasto
+        </button>
+
+        <form id="detail-action-delete" action="" method="POST" onsubmit="return confirm('¿Eliminar este gasto?')" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary" style="width:100%; justify-content:center; color:#f87171; border-color:rgba(239,68,68,0.3);">
+            🗑️ Eliminar Gasto
+          </button>
+        </form>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
         <button type="button" class="btn btn-secondary" data-close-modal>Cerrar</button>
       </div>
     </div>
