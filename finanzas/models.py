@@ -24,6 +24,7 @@ class TipoDivision(models.TextChoices):
 class Gasto(models.Model):
     descripcion = models.CharField(max_length=200)
     monto_total = models.DecimalField(max_digits=12, decimal_places=2)
+    moneda = models.CharField(max_length=10, default='ARS', null=True, blank=True)
     fecha = models.DateField(default=timezone.now)
     pagado_por = models.ForeignKey(Persona, on_delete=models.CASCADE, related_name='gastos_pagados', null=True, blank=True)
     
@@ -88,6 +89,7 @@ class ResponsableFijo(models.TextChoices):
 class GastoFijo(models.Model):
     nombre = models.CharField(max_length=100)
     monto_estimado = models.DecimalField(max_digits=12, decimal_places=2)
+    moneda = models.CharField(max_length=10, default='ARS', null=True, blank=True)
     dia_vencimiento = models.IntegerField(default=1)
     responsable = models.CharField(max_length=15, choices=ResponsableFijo.choices, default=ResponsableFijo.AMBOS)
     
