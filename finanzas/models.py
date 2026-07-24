@@ -15,11 +15,10 @@ class Persona(models.Model):
 
 
 class TipoDivision(models.TextChoices):
-    EQUITY_50_50 = '50_50', 'Ambos (Mitad y Mitad 50/50)'
-    EMI_PERSONAL = 'EMI', 'Propios de Emi (100% Emi)'
-    ULI_PERSONAL = 'ULI', 'Propios de Uli (100% Uli)'
+    EQUITY_50_50 = '50_50', 'Ambos'
+    EMI_PERSONAL = 'EMI', 'Emi'
+    ULI_PERSONAL = 'ULI', 'Uli'
     EXACT_AMOUNT = 'EXACT', 'Montos Exactos'
-    PERCENTAGE = 'PERCENT', 'Porcentaje Personalizado'
 
 
 class Gasto(models.Model):
@@ -55,10 +54,6 @@ class Gasto(models.Model):
             self.monto_emi = 0
             self.monto_uli = total
             self.porcentaje_emi = 0.00
-        elif self.tipo_division == TipoDivision.PERCENTAGE:
-            pct_emi = self.porcentaje_emi or 50.00
-            self.monto_emi = round(total * (pct_emi / 100), 2)
-            self.monto_uli = round(total - self.monto_emi, 2)
 
         super().save(*args, **kwargs)
 
@@ -72,7 +67,7 @@ class Gasto(models.Model):
 
 
 class ResponsableFijo(models.TextChoices):
-    AMBOS = 'COMPARTIDO', 'Ambos (50/50)'
+    AMBOS = 'COMPARTIDO', 'Ambos'
     ULI = 'ULI', 'Uli'
     EMI = 'EMI', 'Emi'
 
