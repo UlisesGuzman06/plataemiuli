@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Cotizaciones de Monedas{% endblock %}
+
+{% block content %}
+<div class="grid-cards">
+  {% for key, info in dolar_rates.items %}
+  <div class="card">
+    <div class="card-title">
+      <span>💵 {{ info.nombre }}</span>
+      <span class="badge badge-ars">ARS / USD</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-top:1rem;">
+      <div>
+        <div style="font-size:0.8rem; color:var(--gray-400);">COMPRA</div>
+        <div style="font-size:1.5rem; font-weight:700; color:white;">${{ info.compra }}</div>
+      </div>
+      <div style="border-right:1px solid var(--border-color);"></div>
+      <div style="text-align:right;">
+        <div style="font-size:0.8rem; color:var(--gray-400);">VENTA</div>
+        <div style="font-size:1.5rem; font-weight:800; color:var(--pink-light);">${{ info.venta }}</div>
+      </div>
+    </div>
+    {% if info.fecha %}
+    <div class="card-subtext" style="font-size:0.75rem;">Actualización: {{ info.fecha|slice:":10" }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Interactive Calculator Box -->
+<div class="card" style="max-width:600px; margin:2rem auto;">
+  <div class="card-title">
+    <span>🧮 Conversor de Pesos a Dólares</span>
+    <span>💡 DolarApi</span>
+  </div>
+
+  <div class="form-group" style="margin-top:1rem;">
+    <label class="form-label">Monto en Pesos ($ ARS)</label>
+    <input type="number" id="calc-ars-input" class="form-control" placeholder="100000" value="100000">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Tipo de Cambio</label>
+    <select id="calc-rate-select" class="form-select">
+      {% if dolar_rates.blue %}
+      <option value="{{ dolar_rates.blue.venta }}">Dólar Blue (${{ dolar_rates.blue.venta }})</option>
+      {% endif %}
+      {% if dolar_rates.bolsa %}
+      <option value="{{ dolar_rates.bolsa.venta }}">Dólar MEP (${{ dolar_rates.bolsa.venta }})</option>
+      {% endif %}
+      {% if dolar_rates.oficial %}
+      <option value="{{ dolar_rates.oficial.venta }}">Dólar Oficial (${{ dolar_rates.oficial.venta }})</option>
+      {% endif %}
+    </select>
+  </div>
+
+  <div style="background:var(--bg-canvas); border:1px solid var(--border-pink); padding:1.25rem; border-radius:var(--radius-md); text-align:center; margin-top:1.5rem;">
+    <div style="font-size:0.85rem; color:var(--gray-400);">Equivalente estimado:</div>
+    <div id="calc-usd-result" style="font-size:2.2rem; font-weight:800; color:var(--pink-light); font-family:inherit;">
+      US$ 0.00
+    </div>
+  </div>
+</div>
+{% endblock %}

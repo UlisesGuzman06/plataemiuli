@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard General{% endblock %}
+
+{% block content %}
+<!-- Hero Net Balance Banner -->
+<div class="hero-balance-box">
+  <div class="hero-balance-header">
+    <div>
+      <div style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:var(--pink-light); font-weight:700;">
+        ⚖️ Estado de Cuentas Compartidas
+      </div>
+      <div style="font-size:2.2rem; font-weight:800; color:white; margin-top:0.25rem;">
+        {{ summary.deuda_texto.ars }}
+      </div>
+      {% if summary.ars.quien_debe %}
+      <div style="font-size:1.4rem; font-weight:700; color:var(--pink-light); margin-top:0.25rem;">
+        Monto: ${{ summary.ars.monto_deuda }} ARS
+      </div>
+      {% endif %}
+    </div>
+
+    <div>
+      <a href="{% url 'balance' %}" class="btn btn-pink">
+        💳 Ajustar / Saldar Deuda
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Metrics Grid -->
+<div class="grid-cards">
+  <div class="card">
+    <div class="card-title">
+      <span>Total Gastos Compartidos</span>
+      <span>💸</span>
+    </div>
+    <div class="card-amount">${{ summary.ars.total_gastos|floatformat:2 }}</div>
+    <div class="card-subtext">Acumulado en ARS</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>Aportes de Emi</span>
+      <span class="badge badge-emi">EMI</span>
+    </div>
+    <div class="card-amount pink">${{ summary.ars.emi_paid|floatformat:2 }}</div>
+    <div class="card-subtext">Cargo propio: ${{ summary.ars.emi_owed_share|floatformat:2 }}</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>Aportes de Uli</span>
+      <span class="badge badge-uli">ULI</span>
+    </div>
+    <div class="card-amount" style="color:#818cf8;">${{ summary.ars.uli_paid|floatformat:2 }}</div>
+    <div class="card-subtext">Cargo propio: ${{ summary.ars.uli_owed_share|floatformat:2 }}</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem;" class="dashboard-tables-grid">
+  <!-- Recent Activity Table -->
+  <div class="table-container">
+    <div class="table-header-box">
+      <div class="table-title">📝 Últimos Gastos Registrados</div>
+      <a href="{% url 'gastos_list' %}" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.8rem;">Ver todos ➔</a>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Descripción</th>
+          <th>Categoría</th>
+          <th>Pagó</th>
+          <th>Monto</th>
+          <th>División</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in recent_gastos %}
+        <tr>
+          <td>{{ g.fecha|date:"d/m/Y" }}</td>
+          <td style="font-weight:600; color:white;">{{ g.descripcion }}</td>
+          <td>
+            {% if g.categoria %}
+            <span>{{ g.categoria.icono }} {{ g.categoria.nombre }}</span>
+            {% else %}
+            <span style="color:var(--gray-500);">Sin cat.</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if g.pagado_por.slug == 'emi' %}
+            <span class="badge badge-emi">Emi</span>
+            {% else %}
+            <span class="badge badge-uli">Uli</span>
+            {% endif %}
+          </td>
+          <td style="font-weight:700; color:white;">${{ g.monto_total }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ g.moneda }}</span></td>
+          <td>
+            <span class="badge badge-shared">{{ g.get_tipo_division_display }}</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align:center; padding:2rem; color:var(--gray-400);">
+            No hay gastos cargados aún. ¡Toca <strong>"Cargar Gasto"</strong> para empezar!
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sidebar: Upcoming Fixed Expenses -->
+  <div>
+    <div class="table-container">
+      <div class="table-header-box">
+        <div class="table-title">📅 Próximos Vencimientos</div>
+      </div>
+      <div style="padding:1rem;">
+        {% for gf in gastos_fijos_proximos %}
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid var(--border-color);">
+          <div>
+            <div style="font-weight:600; color:white;">{{ gf.nombre }}</div>
+            <div style="font-size:0.8rem; color:var(--gray-400);">Vence el día {{ gf.dia_vencimiento }}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700; color:var(--pink-light);">${{ gf.monto_estimado }}</div>
+            <div style="font-size:0.75rem; color:var(--gray-400);">{{ gf.responsable }}</div>
+          </div>
+        </div>
+        {% empty %}
+        <div style="color:var(--gray-400); text-align:center; padding:1.5rem 0;">
+          No hay gastos fijos próximos.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
