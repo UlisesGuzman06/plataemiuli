@@ -55,7 +55,6 @@ def dashboard_view(request):
     
     summary = calculate_financial_summary(year=year, month=month)
     
-    # Gastos filtrados por el mes corriente
     gastos_qs = Gasto.objects.filter(fecha__year=year, fecha__month=month)
     paginator = Paginator(gastos_qs, 10)
     page_number = request.GET.get('page')
@@ -137,6 +136,15 @@ def toggle_gasto_fijo_view(request, gf_id):
         gf = get_object_or_404(GastoFijo, id=gf_id)
         gf.activo = not gf.activo
         gf.save()
+    return redirect('gastos_fijos')
+
+
+def eliminar_gasto_fijo_view(request, gf_id):
+    if request.method == 'POST':
+        gf = get_object_or_404(GastoFijo, id=gf_id)
+        nombre = gf.nombre
+        gf.delete()
+        messages.success(request, f'Gasto fijo "{nombre}" eliminado de la base de datos.')
     return redirect('gastos_fijos')
 
 

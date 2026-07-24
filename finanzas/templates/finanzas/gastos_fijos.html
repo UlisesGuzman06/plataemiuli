@@ -70,12 +70,19 @@
           {% endif %}
         </td>
         <td>
-          <form action="{% url 'toggle_gasto_fijo' gf.id %}" method="POST" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">
-              {% if gf.activo %}Pausar{% else %}Activar{% endif %}
-            </button>
-          </form>
+          <div style="display:flex; gap:0.4rem; align-items:center;">
+            <form action="{% url 'toggle_gasto_fijo' gf.id %}" method="POST" style="display:inline; margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">
+                {% if gf.activo %}Pausar{% else %}Activar{% endif %}
+              </button>
+            </form>
+
+            <form action="{% url 'eliminar_gasto_fijo' gf.id %}" method="POST" onsubmit="return confirm('¿Eliminar este gasto fijo permanentemente?')" style="display:inline; margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="btn-danger-icon" title="Eliminar definitivamente">🗑️</button>
+            </form>
+          </div>
         </td>
       </tr>
       {% empty %}
