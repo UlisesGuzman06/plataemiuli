@@ -31,11 +31,7 @@ function initModals() {
         });
     });
 
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal-overlay')) {
-            e.target.classList.remove('active');
-        }
-    });
+    // Se removió el cierre por clic afuera: los modales ahora solo se cierran tocando la cruz '✕' o 'Cancelar'.
 }
 
 function initSplitCalculator() {
@@ -194,7 +190,6 @@ function initGfDetailModal() {
                 if (btnDescontarCuota) btnDescontarCuota.style.display = 'none';
             }
 
-            // Action Forms inside Modal
             const formToggle = document.getElementById('gf-detail-action-toggle');
             const btnToggleText = document.getElementById('gf-detail-btn-toggle-text');
             if (formToggle) {
@@ -207,7 +202,6 @@ function initGfDetailModal() {
                 formDelete.action = `/gastos-fijos/eliminar/${id}/`;
             }
 
-            // Bind Edit Button inside Modal
             const editBtn = document.getElementById('gf-detail-btn-edit');
             if (editBtn) {
                 editBtn.setAttribute('data-id', id);
@@ -247,7 +241,13 @@ function initEditModals() {
 
                 formEditGasto.action = `/editar/${id}/`;
                 document.getElementById('edit-gasto-desc').value = desc;
-                document.getElementById('edit-gasto-monto').value = monto;
+                
+                const montoInput = document.getElementById('edit-gasto-monto');
+                if (montoInput) {
+                    // Convert potential comma string to standard float dot string for input[type=number]
+                    montoInput.value = parseFloat(monto.replace(',', '.')) || '';
+                }
+
                 document.getElementById('edit-gasto-fecha').value = fecha;
                 document.getElementById('edit-gasto-division').value = division;
                 document.getElementById('edit-gasto-notas').value = notas;
@@ -283,7 +283,12 @@ function initEditModals() {
 
                 formEditGf.action = `/gastos-fijos/editar/${id}/`;
                 document.getElementById('edit-gf-nombre').value = nombre;
-                document.getElementById('edit-gf-monto').value = monto;
+                
+                const montoGfInput = document.getElementById('edit-gf-monto');
+                if (montoGfInput) {
+                    montoGfInput.value = parseFloat(monto.replace(',', '.')) || '';
+                }
+
                 document.getElementById('edit-gf-dia').value = dia;
                 document.getElementById('edit-gf-responsable').value = resp;
 

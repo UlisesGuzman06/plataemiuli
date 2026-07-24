@@ -32,7 +32,7 @@
           data-id="{{ gf.id }}"
           data-nombre="{{ gf.nombre }}"
           data-monto="{{ gf.monto_estimado|punto_monto }}"
-          data-monto-raw="{{ gf.monto_estimado }}"
+          data-monto-raw="{{ gf.monto_estimado|stringformat:'f' }}"
           data-dia="{{ gf.dia_vencimiento }}"
           data-resp="{{ gf.responsable }}"
           data-resp-display="{{ gf.get_responsable_display }}"

@@ -63,7 +63,7 @@
             data-id="{{ g.id }}"
             data-desc="{{ g.descripcion }}" 
             data-monto="{{ g.monto_total|punto_monto }}" 
-            data-monto-raw="{{ g.monto_total }}"
+            data-monto-raw="{{ g.monto_total|stringformat:'f' }}"
             data-fecha="{{ g.fecha|date:'d/m/Y' }}" 
             data-fecha-raw="{{ g.fecha|date:'Y-m-d' }}"
             data-division="{{ g.get_tipo_division_display }}" 
@@ -89,7 +89,7 @@
               <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.8rem;" data-edit-gasto
                       data-id="{{ g.id }}"
                       data-desc="{{ g.descripcion }}"
-                      data-monto-raw="{{ g.monto_total }}"
+                      data-monto-raw="{{ g.monto_total|stringformat:'f' }}"
                       data-fecha-raw="{{ g.fecha|date:'Y-m-d' }}"
                       data-division-raw="{{ g.tipo_division }}"
                       data-notas="{{ g.notas }}"
