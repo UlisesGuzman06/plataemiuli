@@ -14,22 +14,10 @@ class Persona(models.Model):
         verbose_name_plural = "Personas"
 
 
-class Categoria(models.Model):
-    nombre = models.CharField(max_length=50, unique=True)
-    icono = models.CharField(max_length=10, default="📦")
-    color = models.CharField(max_length=7, default="#94a3b8")
-
-    def __str__(self):
-        return f"{self.icono} {self.nombre}"
-
-    class Meta:
-        verbose_name = "Categoría"
-        verbose_name_plural = "Categorías"
-        ordering = ['nombre']
-
-
 class TipoDivision(models.TextChoices):
-    EQUITY_50_50 = '50_50', 'Mitad y Mitad (50 / 50)'
+    EQUITY_50_50 = '50_50', 'Ambos (Mitad y Mitad 50/50)'
+    EMI_PERSONAL = 'EMI', 'Propios de Emi (100% Emi)'
+    ULI_PERSONAL = 'ULI', 'Propios de Uli (100% Uli)'
     EXACT_AMOUNT = 'EXACT', 'Montos Exactos'
     PERCENTAGE = 'PERCENT', 'Porcentaje Personalizado'
 
@@ -38,7 +26,6 @@ class Gasto(models.Model):
     descripcion = models.CharField(max_length=200)
     monto_total = models.DecimalField(max_digits=12, decimal_places=2)
     fecha = models.DateField(default=timezone.now)
-    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True, related_name='gastos')
     pagado_por = models.ForeignKey(Persona, on_delete=models.CASCADE, related_name='gastos_pagados', null=True, blank=True)
     
     tipo_division = models.CharField(max_length=10, choices=TipoDivision.choices, default=TipoDivision.EQUITY_50_50)
@@ -60,6 +47,14 @@ class Gasto(models.Model):
             self.monto_emi = half
             self.monto_uli = half
             self.porcentaje_emi = 50.00
+        elif self.tipo_division == TipoDivision.EMI_PERSONAL:
+            self.monto_emi = total
+            self.monto_uli = 0
+            self.porcentaje_emi = 100.00
+        elif self.tipo_division == TipoDivision.ULI_PERSONAL:
+            self.monto_emi = 0
+            self.monto_uli = total
+            self.porcentaje_emi = 0.00
         elif self.tipo_division == TipoDivision.PERCENTAGE:
             pct_emi = self.porcentaje_emi or 50.00
             self.monto_emi = round(total * (pct_emi / 100), 2)
@@ -77,17 +72,16 @@ class Gasto(models.Model):
 
 
 class ResponsableFijo(models.TextChoices):
-    EMI = 'EMI', 'Emi'
+    AMBOS = 'COMPARTIDO', 'Ambos (50/50)'
     ULI = 'ULI', 'Uli'
-    COMPARTIDO = 'COMPARTIDO', 'Compartido (50/50)'
+    EMI = 'EMI', 'Emi'
 
 
 class GastoFijo(models.Model):
     nombre = models.CharField(max_length=100)
     monto_estimado = models.DecimalField(max_digits=12, decimal_places=2)
     dia_vencimiento = models.IntegerField(default=1)
-    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
-    responsable = models.CharField(max_length=15, choices=ResponsableFijo.choices, default=ResponsableFijo.COMPARTIDO)
+    responsable = models.CharField(max_length=15, choices=ResponsableFijo.choices, default=ResponsableFijo.AMBOS)
     
     # Sistema de Cuotas
     es_cuota = models.BooleanField(default=False)

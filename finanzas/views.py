@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from decimal import Decimal
 from django.utils import timezone
-from .models import Persona, Categoria, Gasto, GastoFijo, TipoDivision
+from .models import Persona, Gasto, GastoFijo, TipoDivision
 from .services import get_dolar_rates, calculate_financial_summary
 
 MESES_NOMBRES = {
@@ -12,12 +12,10 @@ MESES_NOMBRES = {
 }
 
 def get_base_context(request):
-    """Common context variables for topbar dollar rates and personas."""
+    """Common context variables for topbar dollar rates."""
     dolar_rates = get_dolar_rates()
-    categorias = Categoria.objects.all()
     return {
         'dolar_rates': dolar_rates,
-        'categorias': categorias,
         'tipos_division': TipoDivision.choices,
     }
 
@@ -28,7 +26,7 @@ def dashboard_view(request):
     month = now.month
     
     summary = calculate_financial_summary(year=year, month=month)
-    recent_gastos = Gasto.objects.filter(fecha__year=year, fecha__month=month).select_related('categoria')[:10]
+    recent_gastos = Gasto.objects.filter(fecha__year=year, fecha__month=month)[:10]
     gastos_fijos_proximos = GastoFijo.objects.filter(activo=True).order_by('dia_vencimiento')[:10]
     
     context.update({
@@ -47,7 +45,6 @@ def gastos_list_view(request):
         descripcion = request.POST.get('descripcion')
         monto_total = Decimal(request.POST.get('monto_total', '0'))
         fecha = request.POST.get('fecha') or timezone.now().date()
-        categoria_id = request.POST.get('categoria')
         tipo_division = request.POST.get('tipo_division', TipoDivision.EQUITY_50_50)
         
         monto_emi_custom = Decimal(request.POST.get('monto_emi', '0') or '0')
@@ -55,13 +52,10 @@ def gastos_list_view(request):
         pct_emi_custom = Decimal(request.POST.get('porcentaje_emi', '50') or '50')
         notas = request.POST.get('notas', '')
 
-        categoria = Categoria.objects.filter(id=categoria_id).first() if categoria_id else None
-
         gasto = Gasto(
             descripcion=descripcion,
             monto_total=monto_total,
             fecha=fecha,
-            categoria=categoria,
             tipo_division=tipo_division,
             porcentaje_emi=pct_emi_custom,
             notas=notas
@@ -76,11 +70,7 @@ def gastos_list_view(request):
         return redirect('gastos_list')
 
     context = get_base_context(request)
-    gastos_qs = Gasto.objects.select_related('categoria').all()
-
-    categoria_filter = request.GET.get('categoria')
-    if categoria_filter:
-        gastos_qs = gastos_qs.filter(categoria_id=categoria_filter)
+    gastos_qs = Gasto.objects.all()
 
     paginator = Paginator(gastos_qs, 10)
     page_number = request.GET.get('page')
@@ -88,7 +78,6 @@ def gastos_list_view(request):
 
     context.update({
         'gastos': gastos_page,
-        'categoria_filter': categoria_filter,
         'active_tab': 'gastos',
     })
     return render(request, 'finanzas/gastos.html', context)
@@ -108,15 +97,12 @@ def gastos_fijos_view(request):
         nombre = request.POST.get('nombre')
         monto_estimado = Decimal(request.POST.get('monto_estimado', '0'))
         dia_vencimiento = int(request.POST.get('dia_vencimiento', '1'))
-        categoria_id = request.POST.get('categoria')
         responsable = request.POST.get('responsable', 'COMPARTIDO')
         
         es_cuota = request.POST.get('es_cuota') == 'on'
         cuotas_totales = request.POST.get('cuotas_totales')
         cuotas_restantes = request.POST.get('cuotas_restantes')
         fecha_fin_cuota = request.POST.get('fecha_fin_cuota') or None
-
-        categoria = Categoria.objects.filter(id=categoria_id).first() if categoria_id else None
 
         c_tot = int(cuotas_totales) if (es_cuota and cuotas_totales) else None
         c_rest = int(cuotas_restantes) if (es_cuota and cuotas_restantes) else None
@@ -125,7 +111,6 @@ def gastos_fijos_view(request):
             nombre=nombre,
             monto_estimado=monto_estimado,
             dia_vencimiento=dia_vencimiento,
-            categoria=categoria,
             responsable=responsable,
             es_cuota=es_cuota,
             cuotas_totales=c_tot,
@@ -137,7 +122,7 @@ def gastos_fijos_view(request):
         return redirect('gastos_fijos')
 
     context = get_base_context(request)
-    gastos_fijos = GastoFijo.objects.select_related('categoria').all()
+    gastos_fijos = GastoFijo.objects.all()
     context.update({
         'gastos_fijos': gastos_fijos,
         'active_tab': 'gastos_fijos',

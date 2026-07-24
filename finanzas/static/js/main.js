@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initModals();
     initSplitCalculator();
+    initDetailModal();
     initDolarConverter();
 });
 
@@ -39,7 +40,6 @@ function initSplitCalculator() {
     const totalInput = document.getElementById('input-monto-total');
     const splitTypeSelect = document.getElementById('select-tipo-division');
     
-    const calcBox = document.getElementById('split-calc-box');
     const exactGroup = document.getElementById('group-exact-split');
     const pctGroup = document.getElementById('group-pct-split');
 
@@ -56,8 +56,8 @@ function initSplitCalculator() {
         const total = parseFloat(totalInput.value) || 0;
         const type = splitTypeSelect.value;
 
-        exactGroup.style.display = 'none';
-        pctGroup.style.display = 'none';
+        if (exactGroup) exactGroup.style.display = 'none';
+        if (pctGroup) pctGroup.style.display = 'none';
 
         let emiShare = 0;
         let uliShare = 0;
@@ -65,38 +65,25 @@ function initSplitCalculator() {
         if (type === '50_50') {
             emiShare = total / 2;
             uliShare = total / 2;
+        } else if (type === 'EMI') {
+            emiShare = total;
+            uliShare = 0;
+        } else if (type === 'ULI') {
+            emiShare = 0;
+            uliShare = total;
         } else if (type === 'EXACT') {
-            exactGroup.style.display = 'grid';
+            if (exactGroup) exactGroup.style.display = 'grid';
             emiShare = parseFloat(emiMontoInput.value) || 0;
             uliShare = parseFloat(uliMontoInput.value) || 0;
         } else if (type === 'PERCENT') {
-            pctGroup.style.display = 'block';
+            if (pctGroup) pctGroup.style.display = 'block';
             const pctEmi = parseFloat(emiPctInput.value) || 50;
             emiShare = (total * pctEmi) / 100;
             uliShare = total - emiShare;
-        } else if (type === 'FOR_OTHER') {
-            const payerId = document.getElementById('select-pagado-por')?.value;
-            // Payer pays for other, so responsibility is 100% on receiver
-            if (payerId === '1') { // Assuming Emi is ID 1 or slug
-                emiShare = 0;
-                uliShare = total;
-            } else {
-                emiShare = total;
-                uliShare = 0;
-            }
-        } else if (type === 'PERSONAL') {
-            const payerId = document.getElementById('select-pagado-por')?.value;
-            if (payerId === '1') {
-                emiShare = total;
-                uliShare = 0;
-            } else {
-                emiShare = 0;
-                uliShare = total;
-            }
         }
 
-        if (previewEmiText) previewEmiText.textContent = `$${emiShare.toFixed(2)}`;
-        if (previewUliText) previewUliText.textContent = `$${uliShare.toFixed(2)}`;
+        if (previewEmiText) previewEmiText.textContent = `$${emiShare.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+        if (previewUliText) previewUliText.textContent = `$${uliShare.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
     }
 
     totalInput.addEventListener('input', updateSplitPreview);
@@ -104,10 +91,38 @@ function initSplitCalculator() {
     if (emiMontoInput) emiMontoInput.addEventListener('input', updateSplitPreview);
     if (uliMontoInput) uliMontoInput.addEventListener('input', updateSplitPreview);
     if (emiPctInput) emiPctInput.addEventListener('input', updateSplitPreview);
-    const payerSelect = document.getElementById('select-pagado-por');
-    if (payerSelect) payerSelect.addEventListener('change', updateSplitPreview);
 
     updateSplitPreview();
+}
+
+function initDetailModal() {
+    const detailTriggers = document.querySelectorAll('[data-gasto-detail]');
+    const modal = document.getElementById('modal-detalle-gasto');
+
+    if (!modal) return;
+
+    detailTriggers.forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            const desc = el.getAttribute('data-desc') || '';
+            const monto = el.getAttribute('data-monto') || '0';
+            const fecha = el.getAttribute('data-fecha') || '';
+            const division = el.getAttribute('data-division') || '';
+            const emi = el.getAttribute('data-emi') || '0';
+            const uli = el.getAttribute('data-uli') || '0';
+            const notas = el.getAttribute('data-notas') || '';
+
+            document.getElementById('detail-desc').textContent = desc;
+            document.getElementById('detail-monto').textContent = `$${monto}`;
+            document.getElementById('detail-fecha').textContent = fecha;
+            document.getElementById('detail-division').textContent = division;
+            document.getElementById('detail-emi').textContent = `$${emi}`;
+            document.getElementById('detail-uli').textContent = `$${uli}`;
+            document.getElementById('detail-notas').textContent = notas ? notas : 'Sin descripción o notas adicionales.';
+
+            modal.classList.add('active');
+        });
+    });
 }
 
 function initDolarConverter() {
