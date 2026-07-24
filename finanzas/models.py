@@ -14,6 +14,19 @@ class Persona(models.Model):
         verbose_name_plural = "Personas"
 
 
+class Categoria(models.Model):
+    nombre = models.CharField(max_length=50, default="Varios")
+    icono = models.CharField(max_length=10, default="📦")
+    color = models.CharField(max_length=7, default="#94a3b8")
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = "Categoría"
+        verbose_name_plural = "Categorías"
+
+
 class TipoDivision(models.TextChoices):
     EQUITY_50_50 = '50_50', 'Ambos'
     EMI_PERSONAL = 'EMI', 'Emi'
@@ -26,6 +39,7 @@ class Gasto(models.Model):
     monto_total = models.DecimalField(max_digits=12, decimal_places=2)
     moneda = models.CharField(max_length=10, default='ARS', null=True, blank=True)
     fecha = models.DateField(default=timezone.now)
+    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
     pagado_por = models.ForeignKey(Persona, on_delete=models.CASCADE, related_name='gastos_pagados', null=True, blank=True)
     
     tipo_division = models.CharField(max_length=10, choices=TipoDivision.choices, default=TipoDivision.EQUITY_50_50)
@@ -90,6 +104,7 @@ class GastoFijo(models.Model):
     nombre = models.CharField(max_length=100)
     monto_estimado = models.DecimalField(max_digits=12, decimal_places=2)
     moneda = models.CharField(max_length=10, default='ARS', null=True, blank=True)
+    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
     dia_vencimiento = models.IntegerField(default=1)
     responsable = models.CharField(max_length=15, choices=ResponsableFijo.choices, default=ResponsableFijo.AMBOS)
     
