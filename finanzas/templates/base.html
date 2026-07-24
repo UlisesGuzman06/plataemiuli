@@ -56,10 +56,7 @@
   <nav class="main-nav">
     <div class="nav-links">
       <a href="{% url 'dashboard' %}" class="nav-item {% if active_tab == 'dashboard' %}active{% endif %}">
-        📊 Dashboard
-      </a>
-      <a href="{% url 'gastos_list' %}" class="nav-item {% if active_tab == 'gastos' %}active{% endif %}">
-        💸 Gastos
+        📊 Dashboard / Gastos
       </a>
       <a href="{% url 'gastos_fijos' %}" class="nav-item {% if active_tab == 'gastos_fijos' %}active{% endif %}">
         📅 Gastos Fijos
@@ -94,7 +91,7 @@
         <button class="modal-close" data-close-modal>✕</button>
       </div>
 
-      <form action="{% url 'gastos_list' %}" method="POST">
+      <form action="{% url 'dashboard' %}" method="POST">
         {% csrf_token %}
         <div class="form-group">
           <label class="form-label">Nombre de la compra o gasto</label>

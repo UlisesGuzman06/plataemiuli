@@ -20,27 +20,6 @@ def get_base_context(request):
     }
 
 def dashboard_view(request):
-    context = get_base_context(request)
-    now = timezone.now().date()
-    year = now.year
-    month = now.month
-    
-    summary = calculate_financial_summary(year=year, month=month)
-    recent_gastos = Gasto.objects.filter(fecha__year=year, fecha__month=month)[:10]
-    gastos_fijos_proximos = GastoFijo.objects.filter(activo=True).order_by('dia_vencimiento')[:10]
-    
-    context.update({
-        'summary': summary,
-        'recent_gastos': recent_gastos,
-        'gastos_fijos_proximos': gastos_fijos_proximos,
-        'mes_actual_nombre': MESES_NOMBRES.get(month, ''),
-        'anio_actual': year,
-        'active_tab': 'dashboard',
-    })
-    return render(request, 'finanzas/dashboard.html', context)
-
-
-def gastos_list_view(request):
     if request.method == 'POST':
         descripcion = request.POST.get('descripcion')
         monto_total = Decimal(request.POST.get('monto_total', '0'))
@@ -67,20 +46,32 @@ def gastos_list_view(request):
 
         gasto.save()
         messages.success(request, f'Gasto "{descripcion}" cargado correctamente.')
-        return redirect('gastos_list')
+        return redirect('dashboard')
 
     context = get_base_context(request)
-    gastos_qs = Gasto.objects.all()
-
+    now = timezone.now().date()
+    year = now.year
+    month = now.month
+    
+    summary = calculate_financial_summary(year=year, month=month)
+    
+    # Gastos filtrados por el mes corriente
+    gastos_qs = Gasto.objects.filter(fecha__year=year, fecha__month=month)
     paginator = Paginator(gastos_qs, 10)
     page_number = request.GET.get('page')
     gastos_page = paginator.get_page(page_number)
 
+    gastos_fijos_proximos = GastoFijo.objects.filter(activo=True).order_by('dia_vencimiento')[:10]
+    
     context.update({
+        'summary': summary,
         'gastos': gastos_page,
-        'active_tab': 'gastos',
+        'gastos_fijos_proximos': gastos_fijos_proximos,
+        'mes_actual_nombre': MESES_NOMBRES.get(month, ''),
+        'anio_actual': year,
+        'active_tab': 'dashboard',
     })
-    return render(request, 'finanzas/gastos.html', context)
+    return render(request, 'finanzas/dashboard.html', context)
 
 
 def eliminar_gasto_view(request, gasto_id):
@@ -89,7 +80,7 @@ def eliminar_gasto_view(request, gasto_id):
         desc = gasto.descripcion
         gasto.delete()
         messages.success(request, f'Gasto "{desc}" eliminado.')
-    return redirect('gastos_list')
+    return redirect('dashboard')
 
 
 def gastos_fijos_view(request):
