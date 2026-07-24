@@ -2,7 +2,10 @@
 # exit on error
 set -o errexit
 
-find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+export PYTHONDONTWRITEBYTECODE=1
+
+find . -name "*.pyc" -delete 2>/dev/null || true
+find . -type d -name "__pycache__" -delete 2>/dev/null || true
 
 pip install -r requirements.txt
 
