@@ -4,39 +4,14 @@
 {% block title %}Dashboard General{% endblock %}
 
 {% block content %}
-<!-- Hero Net Balance Banner -->
-<div class="hero-balance-box">
-  <div class="hero-balance-header">
-    <div>
-      <div style="font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:var(--pink-light); font-weight:700;">
-        ⚖️ Estado de Cuentas ({{ mes_actual_nombre }} {{ anio_actual }})
-      </div>
-      <div style="font-size:2.2rem; font-weight:800; color:white; margin-top:0.25rem;">
-        {{ summary.deuda_texto.ars }}
-      </div>
-      {% if summary.ars.quien_debe %}
-      <div style="font-size:1.4rem; font-weight:700; color:var(--pink-light); margin-top:0.25rem;">
-        Monto: ${{ summary.ars.monto_deuda|punto_monto }} ARS
-      </div>
-      {% endif %}
-    </div>
-
-    <div>
-      <a href="{% url 'balance' %}" class="btn btn-pink">
-        💳 Ajustar / Saldar Deuda
-      </a>
-    </div>
-  </div>
-</div>
-
 <!-- Quick Metrics Grid -->
-<div class="grid-cards">
+<div class="grid-cards" style="margin-top:1rem;">
   <div class="card">
     <div class="card-title">
-      <span>Gastos Compartidos ({{ mes_actual_nombre }})</span>
+      <span>Gastos Totales ({{ mes_actual_nombre }})</span>
       <span>💸</span>
     </div>
-    <div class="card-amount">${{ summary.ars.total_gastos|punto_monto }}</div>
+    <div class="card-amount">${{ summary.total_gastos|punto_monto }}</div>
     <div class="card-subtext">Acumulado en ARS</div>
   </div>
 
@@ -45,8 +20,8 @@
       <span>Gastos de Emi</span>
       <span class="badge badge-emi">EMI</span>
     </div>
-    <div class="card-amount pink">${{ summary.ars.emi_paid|punto_monto }}</div>
-    <div class="card-subtext">Cargo propio: ${{ summary.ars.emi_owed_share|punto_monto }}</div>
+    <div class="card-amount pink">${{ summary.total_emi|punto_monto }}</div>
+    <div class="card-subtext">Total asignado a Emi</div>
   </div>
 
   <div class="card">
@@ -54,8 +29,8 @@
       <span>Gastos de Uli</span>
       <span class="badge badge-uli">ULI</span>
     </div>
-    <div class="card-amount" style="color:#818cf8;">${{ summary.ars.uli_paid|punto_monto }}</div>
-    <div class="card-subtext">Cargo propio: ${{ summary.ars.uli_owed_share|punto_monto }}</div>
+    <div class="card-amount" style="color:#818cf8;">${{ summary.total_uli|punto_monto }}</div>
+    <div class="card-subtext">Total asignado a Uli</div>
   </div>
 </div>
 
@@ -73,8 +48,7 @@
           <th>Fecha</th>
           <th>Descripción</th>
           <th>Categoría</th>
-          <th>Pagó</th>
-          <th>Monto</th>
+          <th>Monto Total</th>
           <th>División</th>
         </tr>
       </thead>
@@ -90,21 +64,14 @@
             <span style="color:var(--gray-500);">Sin cat.</span>
             {% endif %}
           </td>
-          <td>
-            {% if g.pagado_por.slug == 'emi' %}
-            <span class="badge badge-emi">Emi</span>
-            {% else %}
-            <span class="badge badge-uli">Uli</span>
-            {% endif %}
-          </td>
-          <td style="font-weight:700; color:white;">${{ g.monto_total|punto_monto }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ g.moneda }}</span></td>
+          <td style="font-weight:700; color:white;">${{ g.monto_total|punto_monto }}</td>
           <td>
             <span class="badge badge-shared">{{ g.get_tipo_division_display }}</span>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" style="text-align:center; padding:2rem; color:var(--gray-400);">
+          <td colspan="5" style="text-align:center; padding:2rem; color:var(--gray-400);">
             No hay gastos cargados en {{ mes_actual_nombre }}. ¡Toca <strong>"Cargar Gasto"</strong> para empezar!
           </td>
         </tr>
@@ -123,12 +90,17 @@
         {% for gf in gastos_fijos_proximos %}
         <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid var(--border-color);">
           <div>
-            <div style="font-weight:600; color:white;">{{ gf.nombre }}</div>
+            <div style="font-weight:600; color:white;">
+              {{ gf.nombre }}
+              {% if gf.es_cuota %}
+              <span style="font-size:0.75rem; color:var(--pink-light);">({{ gf.cuota_actual }}/{{ gf.cuotas_totales }})</span>
+              {% endif %}
+            </div>
             <div style="font-size:0.8rem; color:var(--gray-400);">Vence el día {{ gf.dia_vencimiento }}</div>
           </div>
           <div style="text-align:right;">
             <div style="font-weight:700; color:var(--pink-light);">${{ gf.monto_estimado|punto_monto }}</div>
-            <div style="font-size:0.75rem; color:var(--gray-400);">{{ gf.responsable }}</div>
+            <div style="font-size:0.75rem; color:var(--gray-400);">{{ gf.get_responsable_display }}</div>
           </div>
         </div>
         {% empty %}

@@ -61,14 +61,8 @@
       <a href="{% url 'gastos_list' %}" class="nav-item {% if active_tab == 'gastos' %}active{% endif %}">
         💸 Gastos
       </a>
-      <a href="{% url 'balance' %}" class="nav-item {% if active_tab == 'balance' %}active{% endif %}">
-        ⚖️ Balance & Deudas
-      </a>
       <a href="{% url 'gastos_fijos' %}" class="nav-item {% if active_tab == 'gastos_fijos' %}active{% endif %}">
         📅 Gastos Fijos
-      </a>
-      <a href="{% url 'ingresos' %}" class="nav-item {% if active_tab == 'ingresos' %}active{% endif %}">
-        💰 Ingresos
       </a>
       <a href="{% url 'cotizaciones' %}" class="nav-item {% if active_tab == 'cotizaciones' %}active{% endif %}">
         💵 Cotizaciones
@@ -104,32 +98,13 @@
         {% csrf_token %}
         <div class="form-group">
           <label class="form-label">Descripción</label>
-          <input type="text" name="descripcion" class="form-control" placeholder="Ej: Mercado Coto / Salida a cenar" required>
+          <input type="text" name="descripcion" class="form-control" placeholder="Ej: Mercado / Salida a cenar" required>
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label">Monto Total</label>
+            <label class="form-label">Monto Total ($ ARS)</label>
             <input type="number" step="0.01" name="monto_total" id="input-monto-total" class="form-control" placeholder="0.00" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Moneda</label>
-            <select name="moneda" class="form-select">
-              <option value="ARS" selected>Pesos ($ ARS)</option>
-              <option value="USD">Dólares (US$ USD)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">¿Quién Pagó?</label>
-            <select name="pagado_por" id="select-pagado-por" class="form-select" required>
-              {% for p in personas %}
-              <option value="{{ p.id }}">{{ p.nombre }}</option>
-              {% endfor %}
-            </select>
           </div>
 
           <div class="form-group">
@@ -144,7 +119,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Opción de División de Gasto</label>
+          <label class="form-label">División de Gasto</label>
           <select name="tipo_division" id="select-tipo-division" class="form-select">
             {% for code, label in tipos_division %}
             <option value="{{ code }}">{{ label }}</option>
@@ -155,7 +130,7 @@
         <!-- Dynamic Calculator Box -->
         <div class="split-calculator-box" id="split-calc-box">
           <div style="font-size:0.85rem; font-weight:700; color:var(--pink-light); margin-bottom:0.5rem;">
-            📐 Previsualización de Responsabilidad:
+            📐 Previsualización de División:
           </div>
           
           <div class="form-grid-2" id="group-exact-split" style="display:none;">
@@ -206,7 +181,7 @@
   </div>
 
   <footer class="footer">
-    Plata Emi & Uli &copy; {% now 'Y' %} - Sistema de Finanzas Compartidas
+    Plata Emi & Uli &copy; {% now 'Y' %} - Gestión Financiera
   </footer>
 </div>
 

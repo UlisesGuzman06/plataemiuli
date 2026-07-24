@@ -7,8 +7,8 @@
 <div class="table-container">
   <div class="table-header-box">
     <div>
-      <h2 class="table-title">📅 Control de Gastos Fijos Mensuales</h2>
-      <div style="font-size:0.85rem; color:var(--gray-400);">Supervisa tus cuentas recurrentes (alquiler, servicios, tarjetas, etc).</div>
+      <h2 class="table-title">📅 Control de Gastos Fijos y Cuotas Mensuales</h2>
+      <div style="font-size:0.85rem; color:var(--gray-400);">Supervisa tus gastos fijos y el avance de cuotas pendientes.</div>
     </div>
     <div>
       <button class="btn btn-pink" data-open-modal="modal-nuevo-gasto-fijo">➕ Nuevo Gasto Fijo</button>
@@ -23,15 +23,23 @@
         <th>Categoría</th>
         <th>Monto Estimado</th>
         <th>Responsable</th>
+        <th>Cuotas / Avance</th>
         <th>Estado</th>
-        <th>Acción</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       {% for gf in gastos_fijos %}
       <tr>
         <td style="font-weight:700; color:var(--pink-light);">Día {{ gf.dia_vencimiento }}</td>
-        <td style="font-weight:600; color:white;">{{ gf.nombre }}</td>
+        <td style="font-weight:600; color:white;">
+          {{ gf.nombre }}
+          {% if gf.es_cuota and gf.cuotas_totales %}
+          <div style="font-size:0.75rem; color:var(--pink-light);">
+            Cuota {{ gf.cuota_actual }} de {{ gf.cuotas_totales }} (Restan {{ gf.cuotas_restantes }})
+          </div>
+          {% endif %}
+        </td>
         <td>
           {% if gf.categoria %}
           <span>{{ gf.categoria.icono }} {{ gf.categoria.nombre }}</span>
@@ -39,19 +47,33 @@
           <span style="color:var(--gray-500);">Sin cat.</span>
           {% endif %}
         </td>
-        <td style="font-weight:700; color:white;">${{ gf.monto_estimado|punto_monto }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ gf.moneda }}</span></td>
+        <td style="font-weight:700; color:white;">${{ gf.monto_estimado|punto_monto }}</td>
         <td>
           <span class="badge badge-shared">{{ gf.get_responsable_display }}</span>
+        </td>
+        <td>
+          {% if gf.es_cuota and gf.cuotas_totales %}
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <form action="{% url 'descontar_cuota' gf.id %}" method="POST" style="margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem;" title="Pagar y descontar 1 cuota">
+                -1 Cuota
+              </button>
+            </form>
+          </div>
+          {% else %}
+          <span style="color:var(--gray-500); font-size:0.85rem;">Fijo recurrente</span>
+          {% endif %}
         </td>
         <td>
           {% if gf.activo %}
           <span class="badge" style="background:rgba(52,211,153,0.15); color:#34d399;">Activo</span>
           {% else %}
-          <span class="badge" style="background:rgba(113,113,122,0.2); color:#a1a1aa;">Pausado</span>
+          <span class="badge" style="background:rgba(113,113,122,0.2); color:#a1a1aa;">Finalizado/Pausado</span>
           {% endif %}
         </td>
         <td>
-          <form action="{% url 'toggle_gasto_fijo' gf.id %}" method="POST">
+          <form action="{% url 'toggle_gasto_fijo' gf.id %}" method="POST" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;">
               {% if gf.activo %}Pausar{% else %}Activar{% endif %}
@@ -61,7 +83,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="7" style="text-align:center; padding:2rem; color:var(--gray-400);">
+        <td colspan="8" style="text-align:center; padding:2rem; color:var(--gray-400);">
           No hay gastos fijos registrados.
         </td>
       </tr>
@@ -74,7 +96,7 @@
 <div class="modal-overlay" id="modal-nuevo-gasto-fijo">
   <div class="modal-box">
     <div class="modal-header">
-      <h3 class="modal-title">📅 Registrar Gasto Fijo</h3>
+      <h3 class="modal-title">📅 Registrar Gasto Fijo / Cuota</h3>
       <button class="modal-close" data-close-modal>✕</button>
     </div>
 
@@ -82,48 +104,61 @@
       {% csrf_token %}
       <div class="form-group">
         <label class="form-label">Nombre del Gasto Fijo</label>
-        <input type="text" name="nombre" class="form-control" placeholder="Ej: Alquiler / Metrogas / Internet" required>
+        <input type="text" name="nombre" class="form-control" placeholder="Ej: Moto / Alquiler / Metrogas" required>
       </div>
 
       <div class="form-grid-2">
         <div class="form-group">
-          <label class="form-label">Monto Estimado</label>
+          <label class="form-label">Monto Estimado ($ ARS)</label>
           <input type="number" step="0.01" name="monto_estimado" class="form-control" placeholder="0.00" required>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Moneda</label>
-          <select name="moneda" class="form-select">
-            <option value="ARS">Pesos (ARS)</option>
-            <option value="USD">Dólares (USD)</option>
-          </select>
+          <label class="form-label">Día de Vencimiento</label>
+          <input type="number" name="dia_vencimiento" min="1" max="31" class="form-control" value="10" required>
         </div>
       </div>
 
       <div class="form-grid-2">
         <div class="form-group">
-          <label class="form-label">Día de Vencimiento</label>
-          <input type="number" name="dia_vencimiento" min="1" max="31" class="form-control" value="10" required>
-        </div>
-
-        <div class="form-group">
           <label class="form-label">Responsable</label>
           <select name="responsable" class="form-select">
             <option value="COMPARTIDO">Compartido (50/50)</option>
-            <option value="EMI">Emi</option>
             <option value="ULI">Uli</option>
+            <option value="EMI">Emi</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select name="categoria" class="form-select">
+            <option value="">Sin Categoría</option>
+            {% for c in categorias %}
+            <option value="{{ c.id }}">{{ c.icono }} {{ c.nombre }}</option>
+            {% endfor %}
           </select>
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Categoría</label>
-        <select name="categoria" class="form-select">
-          <option value="">Sin Categoría</option>
-          {% for c in categorias %}
-          <option value="{{ c.id }}">{{ c.icono }} {{ c.nombre }}</option>
-          {% endfor %}
-        </select>
+      <!-- Configuración de Cuotas -->
+      <div style="background:var(--bg-canvas); padding:1rem; border-radius:var(--radius-md); margin-top:0.5rem; margin-bottom:1rem; border:1px solid var(--border-color);">
+        <div class="form-group" style="margin-bottom:0.5rem;">
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; color:var(--pink-light);">
+            <input type="checkbox" name="es_cuota" id="check-es-cuota" onchange="document.getElementById('box-cuotas-fields').style.display = this.checked ? 'grid' : 'none'">
+            ¿Es un gasto en cuotas limite? (Ej: Moto en 6 cuotas)
+          </label>
+        </div>
+
+        <div class="form-grid-2" id="box-cuotas-fields" style="display:none; margin-top:0.75rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Cuotas Totales</label>
+            <input type="number" min="1" name="cuotas_totales" class="form-control" placeholder="Ej: 6">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Cuotas Restantes</label>
+            <input type="number" min="1" name="cuotas_restantes" class="form-control" placeholder="Ej: 6">
+          </div>
+        </div>
       </div>
 
       <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">

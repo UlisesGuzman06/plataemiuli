@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse
+from django.core.paginator import Paginator
 from decimal import Decimal
 from django.utils import timezone
-from .models import Persona, Categoria, Gasto, GastoFijo, Ingreso, PagoSaldo, TipoDivision, Moneda
+from .models import Persona, Categoria, Gasto, GastoFijo, TipoDivision
 from .services import get_dolar_rates, calculate_financial_summary
 
 MESES_NOMBRES = {
@@ -14,14 +14,11 @@ MESES_NOMBRES = {
 def get_base_context(request):
     """Common context variables for topbar dollar rates and personas."""
     dolar_rates = get_dolar_rates()
-    personas = Persona.objects.all()
     categorias = Categoria.objects.all()
     return {
         'dolar_rates': dolar_rates,
-        'personas': personas,
         'categorias': categorias,
         'tipos_division': TipoDivision.choices,
-        'monedas': Moneda.choices,
     }
 
 def dashboard_view(request):
@@ -31,7 +28,7 @@ def dashboard_view(request):
     month = now.month
     
     summary = calculate_financial_summary(year=year, month=month)
-    recent_gastos = Gasto.objects.filter(fecha__year=year, fecha__month=month).select_related('categoria', 'pagado_por')[:15]
+    recent_gastos = Gasto.objects.filter(fecha__year=year, fecha__month=month).select_related('categoria')[:10]
     gastos_fijos_proximos = GastoFijo.objects.filter(activo=True).order_by('dia_vencimiento')[:5]
     
     context.update({
@@ -49,34 +46,24 @@ def gastos_list_view(request):
     if request.method == 'POST':
         descripcion = request.POST.get('descripcion')
         monto_total = Decimal(request.POST.get('monto_total', '0'))
-        moneda = request.POST.get('moneda', 'ARS')
         fecha = request.POST.get('fecha') or timezone.now().date()
         categoria_id = request.POST.get('categoria')
-        pagado_por_id = request.POST.get('pagado_por')
         tipo_division = request.POST.get('tipo_division', TipoDivision.EQUITY_50_50)
         
         monto_emi_custom = Decimal(request.POST.get('monto_emi', '0') or '0')
         monto_uli_custom = Decimal(request.POST.get('monto_uli', '0') or '0')
         pct_emi_custom = Decimal(request.POST.get('porcentaje_emi', '50') or '50')
-        
-        pagado_emi = Decimal(request.POST.get('monto_pagado_emi', '0') or '0')
-        pagado_uli = Decimal(request.POST.get('monto_pagado_uli', '0') or '0')
         notas = request.POST.get('notas', '')
 
         categoria = Categoria.objects.filter(id=categoria_id).first() if categoria_id else None
-        pagado_por = get_object_or_404(Persona, id=pagado_por_id)
 
         gasto = Gasto(
             descripcion=descripcion,
             monto_total=monto_total,
-            moneda=moneda,
             fecha=fecha,
             categoria=categoria,
-            pagado_por=pagado_por,
             tipo_division=tipo_division,
             porcentaje_emi=pct_emi_custom,
-            monto_pagado_emi=pagado_emi,
-            monto_pagado_uli=pagado_uli,
             notas=notas
         )
 
@@ -89,25 +76,21 @@ def gastos_list_view(request):
         return redirect('gastos_list')
 
     context = get_base_context(request)
-    gastos = Gasto.objects.select_related('categoria', 'pagado_por').all()
+    gastos_qs = Gasto.objects.select_related('categoria').all()
 
     # Filter logic
-    persona_filter = request.GET.get('persona')
     categoria_filter = request.GET.get('categoria')
-    moneda_filter = request.GET.get('moneda')
-
-    if persona_filter:
-        gastos = gastos.filter(pagado_por__slug=persona_filter)
     if categoria_filter:
-        gastos = gastos.filter(categoria_id=categoria_filter)
-    if moneda_filter:
-        gastos = gastos.filter(moneda=moneda_filter)
+        gastos_qs = gastos_qs.filter(categoria_id=categoria_filter)
+
+    # Paginación de 10 elementos por página
+    paginator = Paginator(gastos_qs, 10)
+    page_number = request.GET.get('page')
+    gastos_page = paginator.get_page(page_number)
 
     context.update({
-        'gastos': gastos,
-        'persona_filter': persona_filter,
+        'gastos': gastos_page,
         'categoria_filter': categoria_filter,
-        'moneda_filter': moneda_filter,
         'active_tab': 'gastos',
     })
     return render(request, 'finanzas/gastos.html', context)
@@ -126,22 +109,29 @@ def gastos_fijos_view(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         monto_estimado = Decimal(request.POST.get('monto_estimado', '0'))
-        moneda = request.POST.get('moneda', 'ARS')
         dia_vencimiento = int(request.POST.get('dia_vencimiento', '10'))
         categoria_id = request.POST.get('categoria')
         responsable = request.POST.get('responsable', 'COMPARTIDO')
-        notas = request.POST.get('notas', '')
+        
+        es_cuota = request.POST.get('es_cuota') == 'on'
+        cuotas_totales = request.POST.get('cuotas_totales')
+        cuotas_restantes = request.POST.get('cuotas_restantes')
 
         categoria = Categoria.objects.filter(id=categoria_id).first() if categoria_id else None
+
+        c_tot = int(cuotas_totales) if (es_cuota and cuotas_totales) else None
+        c_rest = int(cuotas_restantes) if (es_cuota and cuotas_restantes) else None
 
         GastoFijo.objects.create(
             nombre=nombre,
             monto_estimado=monto_estimado,
-            moneda=moneda,
             dia_vencimiento=dia_vencimiento,
             categoria=categoria,
             responsable=responsable,
-            notas=notas
+            es_cuota=es_cuota,
+            cuotas_totales=c_tot,
+            cuotas_restantes=c_rest,
+            activo=True
         )
         messages.success(request, f'Gasto fijo "{nombre}" registrado.')
         return redirect('gastos_fijos')
@@ -155,77 +145,23 @@ def gastos_fijos_view(request):
     return render(request, 'finanzas/gastos_fijos.html', context)
 
 
+def descontar_cuota_view(request, gf_id):
+    if request.method == 'POST':
+        gf = get_object_or_404(GastoFijo, id=gf_id)
+        gf.descollar_cuota()
+        if gf.cuotas_restantes == 0:
+            messages.success(request, f'¡Gasto fijo "{gf.nombre}" completó todas sus cuotas y se finalizó! 🎉')
+        else:
+            messages.success(request, f'Se descontó 1 cuota de "{gf.nombre}". Quedan {gf.cuotas_restantes} cuotas.')
+    return redirect('gastos_fijos')
+
+
 def toggle_gasto_fijo_view(request, gf_id):
     if request.method == 'POST':
         gf = get_object_or_404(GastoFijo, id=gf_id)
         gf.activo = not gf.activo
         gf.save()
     return redirect('gastos_fijos')
-
-
-def balance_view(request):
-    if request.method == 'POST':
-        pagador_id = request.POST.get('pagador')
-        receptor_id = request.POST.get('receptor')
-        monto = Decimal(request.POST.get('monto', '0'))
-        moneda = request.POST.get('moneda', 'ARS')
-        fecha = request.POST.get('fecha') or timezone.now().date()
-        notas = request.POST.get('notas', '')
-
-        pagador = get_object_or_404(Persona, id=pagador_id)
-        receptor = get_object_or_404(Persona, id=receptor_id)
-
-        PagoSaldo.objects.create(
-            pagador=pagador,
-            receptor=receptor,
-            monto=monto,
-            moneda=moneda,
-            fecha=fecha,
-            notas=notas
-        )
-        messages.success(request, f'Pago de ajuste registrado: {pagador.nombre} ➔ {receptor.nombre} (${monto} {moneda}).')
-        return redirect('balance')
-
-    context = get_base_context(request)
-    now = timezone.now().date()
-    summary = calculate_financial_summary(year=now.year, month=now.month)
-    historial_pagos = PagoSaldo.objects.select_related('pagador', 'receptor').all()
-
-    context.update({
-        'summary': summary,
-        'historial_pagos': historial_pagos,
-        'active_tab': 'balance',
-    })
-    return render(request, 'finanzas/balance.html', context)
-
-
-def ingresos_view(request):
-    if request.method == 'POST':
-        persona_id = request.POST.get('persona')
-        monto = Decimal(request.POST.get('monto', '0'))
-        moneda = request.POST.get('moneda', 'ARS')
-        descripcion = request.POST.get('descripcion')
-        fecha = request.POST.get('fecha') or timezone.now().date()
-
-        persona = get_object_or_404(Persona, id=persona_id)
-
-        Ingreso.objects.create(
-            persona=persona,
-            monto=monto,
-            moneda=moneda,
-            descripcion=descripcion,
-            fecha=fecha
-        )
-        messages.success(request, f'Ingreso de {persona.nombre} por ${monto} {moneda} registrado.')
-        return redirect('ingresos')
-
-    context = get_base_context(request)
-    ingresos = Ingreso.objects.select_related('persona').all()
-    context.update({
-        'ingresos': ingresos,
-        'active_tab': 'ingresos',
-    })
-    return render(request, 'finanzas/ingresos.html', context)
 
 
 def cotizaciones_view(request):

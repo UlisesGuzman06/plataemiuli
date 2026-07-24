@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Persona, Categoria, Gasto, GastoFijo, Ingreso, PagoSaldo
+from .models import Persona, Categoria, Gasto, GastoFijo
 
 @admin.register(Persona)
 class PersonaAdmin(admin.ModelAdmin):
@@ -13,25 +13,13 @@ class CategoriaAdmin(admin.ModelAdmin):
 
 @admin.register(Gasto)
 class GastoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'fecha', 'descripcion', 'monto_total', 'moneda', 'pagado_por', 'tipo_division', 'monto_emi', 'monto_uli')
-    list_filter = ('moneda', 'pagado_por', 'tipo_division', 'categoria', 'fecha')
+    list_display = ('id', 'fecha', 'descripcion', 'monto_total', 'tipo_division', 'monto_emi', 'monto_uli')
+    list_filter = ('tipo_division', 'categoria', 'fecha')
     search_fields = ('descripcion', 'notas')
     date_hierarchy = 'fecha'
 
 @admin.register(GastoFijo)
 class GastoFijoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nombre', 'monto_estimado', 'moneda', 'dia_vencimiento', 'responsable', 'activo')
-    list_filter = ('moneda', 'responsable', 'activo')
+    list_display = ('id', 'nombre', 'monto_estimado', 'dia_vencimiento', 'responsable', 'es_cuota', 'cuotas_totales', 'cuotas_restantes', 'activo')
+    list_filter = ('responsable', 'es_cuota', 'activo')
     search_fields = ('nombre',)
-
-@admin.register(Ingreso)
-class IngresoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'fecha', 'persona', 'descripcion', 'monto', 'moneda')
-    list_filter = ('persona', 'moneda', 'fecha')
-    search_fields = ('descripcion',)
-
-@admin.register(PagoSaldo)
-class PagoSaldoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'fecha', 'pagador', 'receptor', 'monto', 'moneda')
-    list_filter = ('moneda', 'fecha')
-    search_fields = ('notas',)
