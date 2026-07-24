@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency_filters %}
 
 {% block title %}Historial de Gastos{% endblock %}
 
@@ -80,12 +81,12 @@
           <span class="badge badge-uli">Uli</span>
           {% endif %}
         </td>
-        <td style="font-weight:700; color:white;">${{ g.monto_total }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ g.moneda }}</span></td>
+        <td style="font-weight:700; color:white;">${{ g.monto_total|punto_monto }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ g.moneda }}</span></td>
         <td>
           <span class="badge badge-shared">{{ g.get_tipo_division_display }}</span>
         </td>
-        <td style="color:#f472b6; font-weight:600;">${{ g.monto_emi }}</td>
-        <td style="color:#818cf8; font-weight:600;">${{ g.monto_uli }}</td>
+        <td style="color:#f472b6; font-weight:600;">${{ g.monto_emi|punto_monto }}</td>
+        <td style="color:#818cf8; font-weight:600;">${{ g.monto_uli|punto_monto }}</td>
         <td>
           <form action="{% url 'eliminar_gasto' g.id %}" method="POST" onsubmit="return confirm('¿Eliminar este gasto?')">
             {% csrf_token %}

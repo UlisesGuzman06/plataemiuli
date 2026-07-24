@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency_filters %}
 
 {% block title %}Dashboard General{% endblock %}
 
@@ -15,7 +16,7 @@
       </div>
       {% if summary.ars.quien_debe %}
       <div style="font-size:1.4rem; font-weight:700; color:var(--pink-light); margin-top:0.25rem;">
-        Monto: ${{ summary.ars.monto_deuda }} ARS
+        Monto: ${{ summary.ars.monto_deuda|punto_monto }} ARS
       </div>
       {% endif %}
     </div>
@@ -35,7 +36,7 @@
       <span>Gastos Compartidos ({{ mes_actual_nombre }})</span>
       <span>💸</span>
     </div>
-    <div class="card-amount">${{ summary.ars.total_gastos|floatformat:2 }}</div>
+    <div class="card-amount">${{ summary.ars.total_gastos|punto_monto }}</div>
     <div class="card-subtext">Acumulado en ARS</div>
   </div>
 
@@ -44,8 +45,8 @@
       <span>Gastos de Emi</span>
       <span class="badge badge-emi">EMI</span>
     </div>
-    <div class="card-amount pink">${{ summary.ars.emi_paid|floatformat:2 }}</div>
-    <div class="card-subtext">Cargo propio: ${{ summary.ars.emi_owed_share|floatformat:2 }}</div>
+    <div class="card-amount pink">${{ summary.ars.emi_paid|punto_monto }}</div>
+    <div class="card-subtext">Cargo propio: ${{ summary.ars.emi_owed_share|punto_monto }}</div>
   </div>
 
   <div class="card">
@@ -53,8 +54,8 @@
       <span>Gastos de Uli</span>
       <span class="badge badge-uli">ULI</span>
     </div>
-    <div class="card-amount" style="color:#818cf8;">${{ summary.ars.uli_paid|floatformat:2 }}</div>
-    <div class="card-subtext">Cargo propio: ${{ summary.ars.uli_owed_share|floatformat:2 }}</div>
+    <div class="card-amount" style="color:#818cf8;">${{ summary.ars.uli_paid|punto_monto }}</div>
+    <div class="card-subtext">Cargo propio: ${{ summary.ars.uli_owed_share|punto_monto }}</div>
   </div>
 </div>
 
@@ -96,7 +97,7 @@
             <span class="badge badge-uli">Uli</span>
             {% endif %}
           </td>
-          <td style="font-weight:700; color:white;">${{ g.monto_total }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ g.moneda }}</span></td>
+          <td style="font-weight:700; color:white;">${{ g.monto_total|punto_monto }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ g.moneda }}</span></td>
           <td>
             <span class="badge badge-shared">{{ g.get_tipo_division_display }}</span>
           </td>
@@ -126,7 +127,7 @@
             <div style="font-size:0.8rem; color:var(--gray-400);">Vence el día {{ gf.dia_vencimiento }}</div>
           </div>
           <div style="text-align:right;">
-            <div style="font-weight:700; color:var(--pink-light);">${{ gf.monto_estimado }}</div>
+            <div style="font-weight:700; color:var(--pink-light);">${{ gf.monto_estimado|punto_monto }}</div>
             <div style="font-size:0.75rem; color:var(--gray-400);">{{ gf.responsable }}</div>
           </div>
         </div>

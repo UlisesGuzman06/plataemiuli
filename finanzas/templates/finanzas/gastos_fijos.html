@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency_filters %}
 
 {% block title %}Gastos Fijos{% endblock %}
 
@@ -38,7 +39,7 @@
           <span style="color:var(--gray-500);">Sin cat.</span>
           {% endif %}
         </td>
-        <td style="font-weight:700; color:white;">${{ gf.monto_estimado }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ gf.moneda }}</span></td>
+        <td style="font-weight:700; color:white;">${{ gf.monto_estimado|punto_monto }} <span style="font-size:0.75rem; color:var(--gray-400);">{{ gf.moneda }}</span></td>
         <td>
           <span class="badge badge-shared">{{ gf.get_responsable_display }}</span>
         </td>
