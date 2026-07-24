@@ -4,42 +4,56 @@
 {% block title %}Dashboard General{% endblock %}
 
 {% block content %}
-<!-- Quick Combined Summary Cards -->
-<div class="grid-cards" style="margin-top:1rem;">
-  <!-- Total Combinado Card -->
-  <div class="card" style="border-color:var(--border-pink); background:linear-gradient(135deg, rgba(34,36,43,0.95) 0%, rgba(236,72,153,0.08) 100%);">
-    <div class="card-title">
-      <span>🔥 Total del Mes (Fijos + Gastos)</span>
-      <span>💰</span>
-    </div>
-    <div class="card-amount">${{ summary.gran_total|punto_monto }}</div>
-    <div class="card-subtext" style="color:var(--gray-300); font-weight:500;">
-      Gastos: <strong>${{ summary.total_gastos|punto_monto }}</strong> | Fijos: <strong>${{ summary.total_fijos|punto_monto }}</strong>
-    </div>
-  </div>
-
-  <!-- Total Emi Card -->
+<!-- Quick Summary Cards Grid (5 Cards) -->
+<div class="grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top:1rem;">
+  <!-- Card 1: Gastos Variables -->
   <div class="card">
     <div class="card-title">
-      <span>Total de Emi ({{ mes_actual_nombre }})</span>
+      <span>Gastos Variables</span>
+      <span>💸</span>
+    </div>
+    <div class="card-amount">${{ summary.total_gastos|punto_monto }}</div>
+    <div class="card-subtext">Acumulado en {{ mes_actual_nombre }}</div>
+  </div>
+
+  <!-- Card 2: Gastos Fijos -->
+  <div class="card">
+    <div class="card-title">
+      <span>Gastos Fijos</span>
+      <span>📅</span>
+    </div>
+    <div class="card-amount pink">${{ summary.total_fijos|punto_monto }}</div>
+    <div class="card-subtext">Comprometido en {{ mes_actual_nombre }}</div>
+  </div>
+
+  <!-- Card 3: Gastos Compartidos / Conjunto -->
+  <div class="card" style="border-color:rgba(52,211,153,0.4);">
+    <div class="card-title">
+      <span>Gastos Compartidos</span>
+      <span>🤝</span>
+    </div>
+    <div class="card-amount" style="color:#34d399;">${{ summary.total_compartidos|punto_monto }}</div>
+    <div class="card-subtext">Totales compartidos 50/50</div>
+  </div>
+
+  <!-- Card 4: Total Emi -->
+  <div class="card">
+    <div class="card-title">
+      <span>Total de Emi</span>
       <span class="badge" style="background:rgba(236, 72, 153, 0.25); color:#f472b6; border:1px solid rgba(236, 72, 153, 0.5);">EMI</span>
     </div>
     <div class="card-amount pink">${{ summary.gran_total_emi|punto_monto }}</div>
-    <div class="card-subtext">
-      Gastos: <strong>${{ summary.total_emi|punto_monto }}</strong> | Fijos: <strong>${{ summary.total_fijos_emi|punto_monto }}</strong>
-    </div>
+    <div class="card-subtext">Var: ${{ summary.total_emi_var|punto_monto }} | Fijos: ${{ summary.total_fijos_emi|punto_monto }}</div>
   </div>
 
-  <!-- Total Uli Card -->
+  <!-- Card 5: Total Uli -->
   <div class="card">
     <div class="card-title">
-      <span>Total de Uli ({{ mes_actual_nombre }})</span>
+      <span>Total de Uli</span>
       <span class="badge" style="background:rgba(99, 102, 241, 0.25); color:#818cf8; border:1px solid rgba(99, 102, 241, 0.5);">ULI</span>
     </div>
     <div class="card-amount" style="color:#818cf8;">${{ summary.gran_total_uli|punto_monto }}</div>
-    <div class="card-subtext">
-      Gastos: <strong>${{ summary.total_uli|punto_monto }}</strong> | Fijos: <strong>${{ summary.total_fijos_uli|punto_monto }}</strong>
-    </div>
+    <div class="card-subtext">Var: ${{ summary.total_uli_var|punto_monto }} | Fijos: ${{ summary.total_fijos_uli|punto_monto }}</div>
   </div>
 </div>
 
@@ -77,13 +91,17 @@
             data-division="{{ g.get_tipo_division_display }}" 
             data-division-raw="{{ g.tipo_division }}"
             data-emi="{{ g.monto_emi|punto_monto }}" 
-            data-uli="{{ g.monto_uli|punto_monto }}" 
+            data-uli="{{ g.monto_uli|punto_monto }}"
+            data-es-tarjeta="{% if g.es_tarjeta %}true{% else %}false{% endif %}"
             data-notas="{{ g.notas }}">
           <td>{{ g.fecha|date:"d/m/Y" }}</td>
           <td style="font-weight:600; color:white;">
             {{ g.descripcion }}
+            {% if g.es_tarjeta %}
+            <span style="font-size:0.75rem; color:var(--pink-light); display:inline-block; margin-left:0.3rem;">💳 Tarjeta</span>
+            {% endif %}
             {% if g.notas %}
-            <span style="font-size:0.75rem; color:var(--pink-light); display:block;">📌 Ver detalles</span>
+            <span style="font-size:0.75rem; color:var(--gray-400); display:block;">📌 Ver notas</span>
             {% endif %}
           </td>
           <td style="font-weight:700; color:white;">${{ g.monto_total|punto_monto }}</td>

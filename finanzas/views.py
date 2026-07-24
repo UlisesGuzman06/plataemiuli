@@ -25,6 +25,7 @@ def dashboard_view(request):
         monto_total = Decimal(request.POST.get('monto_total', '0'))
         fecha = request.POST.get('fecha') or timezone.now().date()
         tipo_division = request.POST.get('tipo_division', TipoDivision.EQUITY_50_50)
+        es_tarjeta = request.POST.get('es_tarjeta') == 'on'
         
         monto_emi_custom = Decimal(request.POST.get('monto_emi', '0') or '0')
         monto_uli_custom = Decimal(request.POST.get('monto_uli', '0') or '0')
@@ -37,6 +38,7 @@ def dashboard_view(request):
             fecha=fecha,
             tipo_division=tipo_division,
             porcentaje_emi=pct_emi_custom,
+            es_tarjeta=es_tarjeta,
             notas=notas
         )
 
@@ -80,6 +82,7 @@ def editar_gasto_view(request, gasto_id):
         gasto.monto_total = Decimal(request.POST.get('monto_total', '0'))
         gasto.fecha = request.POST.get('fecha') or gasto.fecha
         gasto.tipo_division = request.POST.get('tipo_division', gasto.tipo_division)
+        gasto.es_tarjeta = request.POST.get('es_tarjeta') == 'on'
         gasto.notas = request.POST.get('notas', '')
 
         if gasto.tipo_division == TipoDivision.EXACT_AMOUNT:

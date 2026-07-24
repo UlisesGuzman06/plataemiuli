@@ -30,8 +30,6 @@ function initModals() {
             if (modal) modal.classList.remove('active');
         });
     });
-
-    // Se deshabilitó el cierre al hacer clic afuera: los modales solo se cierran al presionar '✕' o 'Cancelar'.
 }
 
 function initSplitCalculator() {
@@ -109,6 +107,7 @@ function initDetailModal() {
             const division = el.getAttribute('data-division') || '';
             const emi = el.getAttribute('data-emi') || '0';
             const uli = el.getAttribute('data-uli') || '0';
+            const esTarjeta = el.getAttribute('data-es-tarjeta') === 'true';
             const notas = el.getAttribute('data-notas') || '';
 
             document.getElementById('detail-desc').textContent = desc;
@@ -117,9 +116,21 @@ function initDetailModal() {
             document.getElementById('detail-division').textContent = division;
             document.getElementById('detail-emi').textContent = `$${emi}`;
             document.getElementById('detail-uli').textContent = `$${uli}`;
+
+            const badgeTarjeta = document.getElementById('detail-tarjeta');
+            if (badgeTarjeta) {
+                if (esTarjeta) {
+                    badgeTarjeta.textContent = '💳 Pagado con Tarjeta';
+                    badgeTarjeta.style.display = 'inline-block';
+                    badgeTarjeta.setAttribute('style', 'background:rgba(236,72,153,0.18); color:#f472b6; border:1px solid rgba(236,72,153,0.4); display:inline-block;');
+                } else {
+                    badgeTarjeta.textContent = '💵 Efectivo / Transferencia';
+                    badgeTarjeta.setAttribute('style', 'background:rgba(113,113,122,0.2); color:#a1a1aa; display:inline-block;');
+                }
+            }
+
             document.getElementById('detail-notas').textContent = notas ? notas : 'Sin descripción o notas adicionales.';
 
-            // Delete form action inside detail modal
             const deleteForm = document.getElementById('detail-action-delete');
             if (deleteForm) {
                 deleteForm.action = `/eliminar/${id}/`;
@@ -132,6 +143,7 @@ function initDetailModal() {
                 detailEditBtn.setAttribute('data-monto-raw', el.getAttribute('data-monto-raw') || '');
                 detailEditBtn.setAttribute('data-fecha-raw', el.getAttribute('data-fecha-raw') || '');
                 detailEditBtn.setAttribute('data-division-raw', el.getAttribute('data-division-raw') || '');
+                detailEditBtn.setAttribute('data-es-tarjeta', esTarjeta ? 'true' : 'false');
                 detailEditBtn.setAttribute('data-notas', notas);
             }
 
@@ -243,6 +255,7 @@ function initEditModals() {
                 const monto = btn.getAttribute('data-monto-raw') || '0';
                 const fecha = btn.getAttribute('data-fecha-raw') || '';
                 const division = btn.getAttribute('data-division-raw') || '50_50';
+                const esTarjeta = btn.getAttribute('data-es-tarjeta') === 'true';
                 const notas = btn.getAttribute('data-notas') || '';
 
                 formEditGasto.action = `/editar/${id}/`;
@@ -255,6 +268,10 @@ function initEditModals() {
 
                 document.getElementById('edit-gasto-fecha').value = fecha;
                 document.getElementById('edit-gasto-division').value = division;
+                
+                const checkTarjeta = document.getElementById('edit-gasto-check-tarjeta');
+                if (checkTarjeta) checkTarjeta.checked = esTarjeta;
+
                 document.getElementById('edit-gasto-notas').value = notas;
 
                 const detailModal = document.getElementById('modal-detalle-gasto');

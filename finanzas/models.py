@@ -33,6 +33,9 @@ class Gasto(models.Model):
     monto_uli = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     porcentaje_emi = models.DecimalField(max_digits=5, decimal_places=2, default=50.00)
 
+    # Pago con tarjeta o efectivo/transferencia
+    es_tarjeta = models.BooleanField(default=False, verbose_name="Pagado con Tarjeta")
+
     notas = models.TextField(blank=True, default='')
     creado_en = models.DateTimeField(auto_now_add=True)
 

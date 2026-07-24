@@ -112,6 +112,14 @@
           </select>
         </div>
 
+        <!-- Checkbox Método de Pago: Tarjeta -->
+        <div class="form-group" style="background:var(--bg-canvas); padding:0.85rem 1rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+          <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-weight:600; color:var(--text-white);">
+            <input type="checkbox" name="es_tarjeta" style="width:1.1rem; height:1.1rem; accent-color:var(--pink-primary);">
+            💳 ¿Fue pagado con Tarjeta de Crédito/Débito?
+          </label>
+        </div>
+
         <!-- Dynamic Calculator Box -->
         <div class="split-calculator-box" id="split-calc-box">
           <div style="font-size:0.85rem; font-weight:700; color:var(--pink-light); margin-bottom:0.5rem;">
@@ -189,6 +197,13 @@
           </select>
         </div>
 
+        <div class="form-group" style="background:var(--bg-canvas); padding:0.85rem 1rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+          <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-weight:600; color:var(--text-white);">
+            <input type="checkbox" name="es_tarjeta" id="edit-gasto-check-tarjeta" style="width:1.1rem; height:1.1rem; accent-color:var(--pink-primary);">
+            💳 ¿Fue pagado con Tarjeta de Crédito/Débito?
+          </label>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Fecha</label>
           <input type="date" name="fecha" id="edit-gasto-fecha" class="form-control" required>
@@ -226,9 +241,14 @@
           <span id="detail-fecha" style="font-weight:600; color:white;">-</span>
         </div>
 
-        <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; margin-bottom:0.4rem;">
           <span style="color:var(--gray-400);">División:</span>
           <span id="detail-division" class="badge badge-shared">-</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
+          <span style="color:var(--gray-400);">Método de Pago:</span>
+          <span id="detail-tarjeta" class="badge">-</span>
         </div>
       </div>
 
