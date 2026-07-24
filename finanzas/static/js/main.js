@@ -1,11 +1,12 @@
 /* ==========================================================================
-   Plata Emi & Uli - Interactive JS, Edit Modals & Dynamic Split Calculator
+   Plata Emi & Uli - Interactive JS, Detail & Edit Modals for Gastos & Gastos Fijos
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
     initModals();
     initSplitCalculator();
     initDetailModal();
+    initGfDetailModal();
     initEditModals();
     initDolarConverter();
 });
@@ -122,7 +123,6 @@ function initDetailModal() {
             document.getElementById('detail-uli').textContent = `$${uli}`;
             document.getElementById('detail-notas').textContent = notas ? notas : 'Sin descripción o notas adicionales.';
 
-            // Pass ID to detail modal edit button
             const detailEditBtn = document.getElementById('detail-btn-edit');
             if (detailEditBtn) {
                 detailEditBtn.setAttribute('data-id', id);
@@ -131,6 +131,94 @@ function initDetailModal() {
                 detailEditBtn.setAttribute('data-fecha-raw', el.getAttribute('data-fecha-raw') || '');
                 detailEditBtn.setAttribute('data-division-raw', el.getAttribute('data-division-raw') || '');
                 detailEditBtn.setAttribute('data-notas', notas);
+            }
+
+            modal.classList.add('active');
+        });
+    });
+}
+
+function initGfDetailModal() {
+    const gfTriggers = document.querySelectorAll('[data-gf-detail]');
+    const modal = document.getElementById('modal-detalle-gasto-fijo');
+
+    if (!modal) return;
+
+    gfTriggers.forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            const id = el.getAttribute('data-id');
+            const nombre = el.getAttribute('data-nombre') || '';
+            const monto = el.getAttribute('data-monto') || '0';
+            const dia = el.getAttribute('data-dia') || '1';
+            const respDisplay = el.getAttribute('data-resp-display') || 'Ambos';
+            const badgeStyle = el.getAttribute('data-badge-style') || '';
+            const esCuota = el.getAttribute('data-es-cuota') === 'true';
+            const cuotaActual = el.getAttribute('data-cuota-actual') || '';
+            const cuotasTotales = el.getAttribute('data-cuotas-totales') || '';
+            const cuotasRestantes = el.getAttribute('data-cuotas-restantes') || '';
+            const fechaFin = el.getAttribute('data-fecha-fin-display') || '';
+            const activo = el.getAttribute('data-activo') === 'true';
+
+            document.getElementById('gf-detail-nombre').textContent = nombre;
+            document.getElementById('gf-detail-monto').textContent = `$${monto}`;
+            document.getElementById('gf-detail-dia').textContent = `Día ${dia} de cada mes`;
+            
+            const badgeResp = document.getElementById('gf-detail-resp');
+            badgeResp.textContent = respDisplay;
+            badgeResp.setAttribute('style', badgeStyle);
+
+            const statusBadge = document.getElementById('gf-detail-status');
+            if (activo) {
+                statusBadge.textContent = 'Activo';
+                statusBadge.setAttribute('style', 'background:rgba(52,211,153,0.15); color:#34d399;');
+            } else {
+                statusBadge.textContent = 'Finalizado/Pausado';
+                statusBadge.setAttribute('style', 'background:rgba(113,113,122,0.2); color:#a1a1aa;');
+            }
+
+            const boxCuotas = document.getElementById('gf-detail-box-cuotas');
+            const btnDescontarCuota = document.getElementById('gf-detail-form-descontar');
+
+            if (esCuota && cuotasTotales) {
+                boxCuotas.style.display = 'block';
+                document.getElementById('gf-detail-cuota-info').textContent = `Cuota ${cuotaActual} de ${cuotasTotales} (Restan ${cuotasRestantes})`;
+                document.getElementById('gf-detail-fecha-fin').textContent = fechaFin ? `🏁 Finaliza: ${fechaFin}` : '';
+                
+                if (btnDescontarCuota) {
+                    btnDescontarCuota.style.display = 'inline-block';
+                    document.getElementById('gf-detail-action-descontar').action = `/gastos-fijos/descontar-cuota/${id}/`;
+                }
+            } else {
+                boxCuotas.style.display = 'none';
+                if (btnDescontarCuota) btnDescontarCuota.style.display = 'none';
+            }
+
+            // Action Forms inside Modal
+            const formToggle = document.getElementById('gf-detail-action-toggle');
+            const btnToggleText = document.getElementById('gf-detail-btn-toggle-text');
+            if (formToggle) {
+                formToggle.action = `/gastos-fijos/toggle/${id}/`;
+                btnToggleText.textContent = activo ? 'Pausar Gasto Fijo' : 'Activar Gasto Fijo';
+            }
+
+            const formDelete = document.getElementById('gf-detail-action-delete');
+            if (formDelete) {
+                formDelete.action = `/gastos-fijos/eliminar/${id}/`;
+            }
+
+            // Bind Edit Button inside Modal
+            const editBtn = document.getElementById('gf-detail-btn-edit');
+            if (editBtn) {
+                editBtn.setAttribute('data-id', id);
+                editBtn.setAttribute('data-nombre', nombre);
+                editBtn.setAttribute('data-monto-raw', el.getAttribute('data-monto-raw') || '');
+                editBtn.setAttribute('data-dia', dia);
+                editBtn.setAttribute('data-resp', el.getAttribute('data-resp') || 'COMPARTIDO');
+                editBtn.setAttribute('data-es-cuota', esCuota ? 'true' : 'false');
+                editBtn.setAttribute('data-cuotas-totales', cuotasTotales);
+                editBtn.setAttribute('data-cuotas-restantes', cuotasRestantes);
+                editBtn.setAttribute('data-fecha-fin', el.getAttribute('data-fecha-fin-raw') || '');
             }
 
             modal.classList.add('active');
@@ -164,7 +252,6 @@ function initEditModals() {
                 document.getElementById('edit-gasto-division').value = division;
                 document.getElementById('edit-gasto-notas').value = notas;
 
-                // Close detail modal if open
                 const detailModal = document.getElementById('modal-detalle-gasto');
                 if (detailModal) detailModal.classList.remove('active');
 
@@ -210,6 +297,9 @@ function initEditModals() {
                 document.getElementById('edit-gf-cuotas-totales').value = cTotales;
                 document.getElementById('edit-gf-cuotas-restantes').value = cRestantes;
                 document.getElementById('edit-gf-fecha-fin').value = fechaFin;
+
+                const detailGfModal = document.getElementById('modal-detalle-gasto-fijo');
+                if (detailGfModal) detailGfModal.classList.remove('active');
 
                 modalEditGf.classList.add('active');
             });
