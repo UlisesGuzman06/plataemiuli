@@ -1,8 +1,28 @@
 import requests
+import datetime
 from decimal import Decimal
+from django.utils import timezone
 from .models import Persona, Gasto, GastoFijo, TipoDivision, ResponsableFijo
 
 DOLAR_API_URL = "https://dolarapi.com/v1/dolares"
+
+def auto_prune_old_gastos():
+    """
+    Mantiene los datos de gastos variables en la base de datos únicamente por 2 meses corrientes.
+    Los Gastos Fijos (GastoFijo) NUNCA se eliminan.
+    """
+    try:
+        now = timezone.now().date()
+        m = now.month - 2
+        y = now.year
+        if m <= 0:
+            m += 12
+            y -= 1
+        cutoff_date = datetime.date(y, m, 1)
+        Gasto.objects.filter(fecha__lt=cutoff_date).delete()
+    except Exception as e:
+        print(f"Error en depuración de datos antiguos: {e}")
+
 
 _rates_cache = None
 _rates_timestamp = 0
@@ -57,6 +77,8 @@ def calculate_financial_summary(year=None, month=None):
         'total_fijos_uli': Decimal('0.00'),       # Fijos Uli
         'total_fijos_compartidos': Decimal('0.00'), # Fijos Compartidos
 
+        'total_tarjeta_uli': Decimal('0.00'),     # Tarjeta Uli (en división o 100% Uli)
+
         'gran_total': Decimal('0.00'),            # Variables + Fijos total
         'gran_total_emi': Decimal('0.00'),        # Variables Emi + Fijos Emi
         'gran_total_uli': Decimal('0.00'),        # Variables Uli + Fijos Uli
@@ -74,6 +96,10 @@ def calculate_financial_summary(year=None, month=None):
 
         if g.tipo_division == TipoDivision.EQUITY_50_50:
             summary['total_compartidos'] += g.monto_total
+
+        # Si fue pagado con tarjeta y Ulises está en la división (50/50, exacto) o al 100%
+        if g.es_tarjeta and g.monto_uli > 0:
+            summary['total_tarjeta_uli'] += g.monto_uli
 
     # 2. Gastos Fijos activos
     gastos_fijos = GastoFijo.objects.filter(activo=True)

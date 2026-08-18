@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from decimal import Decimal
 from django.utils import timezone
 from .models import Persona, Gasto, GastoFijo, TipoDivision
-from .services import get_dolar_rates, calculate_financial_summary
+from .services import get_dolar_rates, calculate_financial_summary, auto_prune_old_gastos
 
 MESES_NOMBRES = {
     1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
@@ -50,26 +50,46 @@ def dashboard_view(request):
         messages.success(request, f'Gasto "{descripcion}" cargado correctamente.')
         return redirect('dashboard')
 
+    # Limpieza automática de DB: máximo 2 meses corrientes de calendario (GastoFijo se mantiene infinito)
+    auto_prune_old_gastos()
+
     context = get_base_context(request)
     now = timezone.now().date()
-    year = now.year
-    month = now.month
+    ver_anterior = request.GET.get('period') == 'previous' or request.GET.get('ver_anterior') == 'true'
+
+    if ver_anterior:
+        target_month = now.month - 1
+        target_year = now.year
+        if target_month <= 0:
+            target_month = 12
+            target_year -= 1
+    else:
+        target_year = now.year
+        target_month = now.month
     
-    summary = calculate_financial_summary(year=year, month=month)
+    summary = calculate_financial_summary(year=target_year, month=target_month)
     
-    gastos_qs = Gasto.objects.filter(fecha__year=year, fecha__month=month)
-    paginator = Paginator(gastos_qs, 10)
+    gastos_qs = Gasto.objects.filter(fecha__year=target_year, fecha__month=target_month).order_by('-fecha', '-id')
+    paginator = Paginator(gastos_qs, 15)
     page_number = request.GET.get('page')
     gastos_page = paginator.get_page(page_number)
 
     gastos_fijos_proximos = GastoFijo.objects.filter(activo=True).order_by('dia_vencimiento')[:10]
+
+    prev_m = now.month - 1 if now.month > 1 else 12
+    mes_anterior_nombre = MESES_NOMBRES.get(prev_m, '')
+    mes_actual_nombre = MESES_NOMBRES.get(now.month, '')
+    mes_seleccionado_nombre = MESES_NOMBRES.get(target_month, '')
     
     context.update({
         'summary': summary,
         'gastos': gastos_page,
         'gastos_fijos_proximos': gastos_fijos_proximos,
-        'mes_actual_nombre': MESES_NOMBRES.get(month, ''),
-        'anio_actual': year,
+        'mes_actual_nombre': mes_actual_nombre,
+        'mes_anterior_nombre': mes_anterior_nombre,
+        'mes_seleccionado_nombre': mes_seleccionado_nombre,
+        'ver_anterior': ver_anterior,
+        'anio_actual': target_year,
         'active_tab': 'dashboard',
     })
     return render(request, 'finanzas/dashboard.html', context)
